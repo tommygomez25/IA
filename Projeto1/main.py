@@ -22,6 +22,9 @@ class Game:
             self.events()
             self.update()
             self.draw()
+        # write winner
+        self.screen.fill(BACKGROUND_COLOR)
+        self.draw_grid()
             
     def update(self):
         pass
@@ -32,6 +35,9 @@ class Game:
 
         for col in range(0,GAME_SIZE*TILE_SIZE + TILE_SIZE, TILE_SIZE+1):
             pygame.draw.line(self.screen, BLUE_PIECE_COLOR, (0,col), (GAME_SIZE*TILE_SIZE,col),7)
+
+        # draw black hole
+        #pygame.draw.circle(self.screen, BLACK, (2*TILE_SIZE + TILE_SIZE/2,2*TILE_SIZE + TILE_SIZE/2),TILE_SIZE/2-10)
     
     def draw_board(self):
         self.state.draw(self.screen)
@@ -73,7 +79,7 @@ class Game:
                                         state.selected_piece = piece
                                         return 
                                     
-                        if self.state.is_valid_move(self.sate.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
+                        if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
                             self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
                             self.state.selected_piece = None
                             # SWITCH TURNS
@@ -93,10 +99,20 @@ class Game:
                                             p.selected = False
                                         piece.selected = True
                                         state.selected_piece = piece
-                                        
+            #check if any player won
+            if self.state.check_win():
+                self.winner = self.turn
+                print("Player {} won!".format(self.winner))
+                pygame.time.delay(2000)
+                self.winner = None
+                self.turn = 1
+                self.state = State(self.state.pieces)
+                self.new()
+                return
             
 
 game_pieces = [
+    Piece(2,2,BLACK_HOLE_COLOR, 0),
     Piece(0,0,RED_PIECE_COLOR, 1),
     Piece(1,1,RED_PIECE_COLOR,  1), 
     Piece(4,0,RED_PIECE_COLOR, 1),
@@ -105,7 +121,6 @@ game_pieces = [
     Piece(1,3,BLUE_PIECE_COLOR, 2),
     Piece(4,4,BLUE_PIECE_COLOR, 2),
     Piece(3,3,BLUE_PIECE_COLOR, 2),
-    Piece(2,2,BLACK_HOLE_COLOR, 0),
 ]
 
 state = State(game_pieces)
