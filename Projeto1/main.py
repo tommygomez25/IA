@@ -73,8 +73,8 @@ class Game:
                                         state.selected_piece = piece
                                         return 
                                     
-                        if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
-                            self.state.move()
+                        if self.state.is_valid_move(self.sate.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
+                            self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
                             self.state.selected_piece = None
                             # SWITCH TURNS
                             self.turn = 2 if self.turn == 1 else 1

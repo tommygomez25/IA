@@ -20,69 +20,62 @@ class State:
     
         # if the piece is moving horizontally
         if piece.x != x:
-            if x < piece.x:
-                piece.dx = -1
-            elif x > piece.x:
-                piece.dx = 1
-            piece.dy = 0
-            # check if piece is out of bounds
-            if not piece.removed:
-                if piece.x < 0:
-                    piece.x = 0
-                    piece.dx = 0
-                elif piece.x > 4:
-                    piece.x = 4
-                    piece.dx = 0
-                if piece.y < 0:
-                    piece.y = 0
-                    piece.dy = 0
-                elif piece.y > 4:
-                    piece.y = 4
-                    piece.dy = 0
-            # check if pieces are on top of each other
-            for p in self.pieces:
-                if p != self and p.x == piece.x and p.y == piece.y:
-                    piece.x -= piece.dx
-                    piece.y -= piece.dy
-                    piece.dx = 0
-                    piece.dy = 0
-        
+            # if the piece is moving left
+            if x<piece.x:
+                if x == 0 and not self.is_piece_at(x,piece.y) and self.get_first_blocking_piece(piece,-1,0) == None:
+                    return True
+                if not self.is_piece_at(x-1,piece.y):
+                    return False
+            # if the piece is moving right
+            else:
+                if x == 4 and not self.is_piece_at(x,piece.y):
+                    return True
+                if not self.is_piece_at(x+1,piece.y):
+                    return False
+                    
         # if the piece is moving vertically
         if piece.y != y:
-            if y < piece.y:
-                piece.dy = -1
-            elif y > piece.y:
-                piece.dy = 1
-            piece.dx = 0
-            
-            # check if piece is out of bounds
-            if not piece.removed:
-                if piece.x < 0:
-                    piece.x = 0
-                    piece.dx = 0
-                elif piece.x > 4:
-                    piece.x = 4
-                    piece.dx = 0
-                if piece.y < 0:
-                    piece.y = 0
-                    piece.dy = 0
-                elif piece.y > 4:
-                    piece.y = 4
-                    piece.dy = 0
-            # check if pieces are on top of each other
-            for p in self.pieces:
-                if p != self and p.x == piece.x and p.y == piece.y:
-                    piece.x -= piece.dx
-                    piece.y -= piece.dy
-                    piece.dx = 0
-                    piece.dy = 0
+            # if the piece is moving up
+            if y<piece.y:
+                if y == 0 and not self.is_piece_at(piece.x,y):
+                    return True
+                if not self.is_piece_at(piece.x,y-1):
+                    return False
+            # if the piece is moving down
+            else:
+                if y == 4 and self.is_piece_at(piece.x,y):
+                    return True
+                if not self.is_piece_at(piece.x,y+1):
+                    return False
         return True
     
-    def move(self):
+    def is_piece_at(self,x,y):
         for piece in self.pieces:
-            piece.move()
+            if piece.x == x and piece.y == y and piece != self.selected_piece:
+                return True
+        return False
     
-
+    def move_piece(self,piece,x,y):
+        piece.x = x
+        piece.y = y
+        piece.dx = 0
+        piece.dy = 0
+        piece.selected = False
+        self.selected_piece = None
+    
+    def get_first_blocking_piece(self,piece,dx,dy):
+        x = piece.x
+        y = piece.y
+        while self.is_valid_move(piece,x+dx,y+dy):
+            x += dx
+            y += dy
+        return self.get_piece_at(x,y)
+    
+    def get_piece_at(self,x,y):
+        for piece in self.pieces:
+            if piece.x == x and piece.y == y:
+                return piece
+        return None
         
             
     
