@@ -15,7 +15,6 @@ class Piece:
             pygame.draw.circle(screen,self.color,(self.x * TILE_SIZE + TILE_SIZE/2,self.y * TILE_SIZE + TILE_SIZE/2),TILE_SIZE/2-10)
             if self.selected:
                 pygame.draw.circle(screen,WHITE,(self.x * TILE_SIZE + TILE_SIZE/2,self.y * TILE_SIZE + TILE_SIZE/2),TILE_SIZE/2-10,3)
-                # draw available moves
                 for move in self.available_moves(state):
                     pygame.draw.circle(screen,GREY,(move[0] * TILE_SIZE + TILE_SIZE/2,move[1] * TILE_SIZE + TILE_SIZE/2),TILE_SIZE/2-10)
                 

@@ -37,7 +37,6 @@ class State:
         return None
     
     def check_win(self):
-        # if any of the players has 2 pieces he is the winner
         player1_pieces = 0
         player2_pieces = 0
         for piece in self.pieces:

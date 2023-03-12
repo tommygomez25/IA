@@ -22,25 +22,9 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            #check if any player won
             if self.state.check_win():
                 self.winner = self.turn
-        
-        # write winner
-        while True:
-            self.clock.tick(FPS)
-            self.screen.fill(WHITE)
-            font = pygame.font.SysFont('Arial', 30)
-            text = font.render("Player " + str(self.winner) + " won!", True, BLACK)
-            textRect = text.get_rect()
-            textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-            self.screen.blit(text, textRect)
-            pygame.display.flip()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    quit(0)
-
+        self.display_winner()
             
     def update(self):
         pass
@@ -60,6 +44,23 @@ class Game:
         self.draw_grid()
         self.draw_board()
         pygame.display.flip()
+
+    def display_winner(self):
+        while True:
+            self.clock.tick(FPS)
+            self.screen.fill(WHITE)
+            font = pygame.font.SysFont('Arial', 30)
+            text = font.render("Player " + str(self.winner) + " won!", True, BLACK)
+            textRect = text.get_rect()
+            textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            self.screen.blit(text, textRect)
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit(0)
+        
+
     
     def events(self):
         for event in pygame.event.get():
@@ -95,7 +96,6 @@ class Game:
                         if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
                             self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
                             self.state.selected_piece = None
-                            # SWITCH TURNS
                             self.turn = 3 - self.turn
                     
             else:
@@ -132,5 +132,4 @@ game = Game(state)
 
 while True:
     game.new()
-    #game.run()
     
