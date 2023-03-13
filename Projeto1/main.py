@@ -30,7 +30,7 @@ class Game:
             else:
                 self.player2(self)
             if self.state.check_win():
-                self.winner = self.turn
+                self.winner = 3 - self.turn
         self.display_winner()
             
     def update(self):
@@ -220,7 +220,7 @@ game_pieces = [
 state = State(game_pieces)
 
 #game = Game(state, execute_human_move, execute_human_move) #human vs human
-game = Game(state, execute_human_move, execute_ai_move(4, evaluate_f2)) #human vs ai
+game = Game(state, execute_human_move, execute_ai_move(5, evaluate_f3)) #human vs ai
 #game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
 #game = Game(state, execute_ai_move(5, evaluate_f3), execute_ai_move(5, evaluate_f2)) #ai vs ai
 
