@@ -184,6 +184,27 @@ def evaluate_f1(state):
                 pieces2 += len(piece.available_moves(state))
     return pieces1 - pieces2
 
+def evaluate_f2(state):
+    #manhattan distance from center
+    pieces1 = 0
+    pieces2 = 0
+    for piece in state.pieces:
+        if piece.color == RED_PIECE_COLOR:
+            if piece.removed:
+                pieces1 += 1000
+            else:
+                pieces1 -= abs(piece.x - 2) + abs(piece.y - 2)
+        elif piece.color == BLUE_PIECE_COLOR:
+            if piece.removed:
+                pieces2 += 1000
+            else:
+                pieces2 -= abs(piece.x - 2) + abs(piece.y - 2)
+    return pieces1 - pieces2
+
+def evaluate_f3(state):
+    # join two other heuristics
+    return evaluate_f1(state) + evaluate_f2(state)
+
 game_pieces = [
     Piece(2,2,BLACK_HOLE_COLOR, 0),
     Piece(0,0,RED_PIECE_COLOR, 1),
@@ -199,9 +220,9 @@ game_pieces = [
 state = State(game_pieces)
 
 #game = Game(state, execute_human_move, execute_human_move) #human vs human
-#game = Game(state, execute_human_move, execute_ai_move(4, evaluate_f1)) #human vs ai
-game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
-#game = Game(state, execute_ai_move(4, evaluate_f1), execute_ai_move(4, evaluate_f1)) #ai vs ai
+game = Game(state, execute_human_move, execute_ai_move(4, evaluate_f2)) #human vs ai
+#game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
+#game = Game(state, execute_ai_move(5, evaluate_f3), execute_ai_move(5, evaluate_f2)) #ai vs ai
 
 while True:
     game.new()
