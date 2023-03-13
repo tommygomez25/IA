@@ -12,7 +12,7 @@ class State:
             piece.draw(screen, self)
     
     def is_valid_move(self,piece,x,y):
-        return piece.available_moves(self).count((x,y)) > 0
+        return piece.available_moves(self).count((piece.x,piece.y,x,y)) > 0
     
     def is_piece_at(self,x,y):
         if x == 2 and y == 2:
@@ -22,6 +22,13 @@ class State:
                 return True
         return False
     
+    def available_moves(self, turn):
+        moves = []
+        for piece in self.pieces:
+            if piece.player == turn and not piece.removed:
+                moves.extend(piece.available_moves(self))
+        return moves
+    
     def move_piece(self,piece,x,y):
         piece.x = x
         piece.y = y
@@ -29,6 +36,7 @@ class State:
         self.selected_piece = None
         if(piece.landed_on_black_hole()):
             piece.removed = True
+        return self
     
     def get_piece_at(self,x,y):
         for piece in self.pieces:

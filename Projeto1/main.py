@@ -2,9 +2,13 @@ import pygame
 from piece import Piece
 from settings import *
 from state import State
+import math
+from copy import deepcopy
+import time
+
 
 class Game:
-    def __init__(self,state):
+    def __init__(self,state, player1, player2):
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Black Hole Escape")
@@ -12,16 +16,19 @@ class Game:
         self.winner = None
         self.turn = 1
         self.state = state
+        self.player1 = player1
+        self.player2 = player2
     
     def new(self):
         self.run()
     
     def run(self):
         while self.winner is None:
-            self.clock.tick(FPS)
-            self.events()
-            self.update()
             self.draw()
+            if self.turn == 1:
+                self.player1(self)
+            else:
+                self.player2(self)
             if self.state.check_win():
                 self.winner = self.turn
         self.display_winner()
@@ -94,7 +101,7 @@ class Game:
                                         return 
                                     
                         if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
-                            self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
+                            self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
                             self.state.selected_piece = None
                             self.turn = 3 - self.turn
                     
@@ -114,6 +121,69 @@ class Game:
                                         state.selected_piece = piece
             
 
+def execute_human_move(game):
+    game.clock.tick(FPS)
+    game.events()
+    game.update()
+
+def execute_ai_move(dififculty, evaluate_func):
+    def ai_move(game):
+        game.clock.tick(FPS)
+        value = minimax(game.state, dififculty, -math.inf, math.inf, True, game.turn, evaluate_func)
+        for (x,y, newX, newY) in game.state.available_moves(game.turn):
+            state_copy = deepcopy(game.state)
+            state_copy = state_copy.move_piece(state_copy.get_piece_at(x, y),newX, newY)
+            if value == minimax(state_copy, dififculty - 1, -math.inf, math.inf, False, game.turn, evaluate_func):
+                game.state = game.state.move_piece(game.state.get_piece_at(x, y),newX, newY)
+                break
+        game.update()
+        game.turn = 3 - game.turn
+    return ai_move
+
+def minimax(state, depth, alpha, beta, maximizing, player, evaluate_func):
+    if depth == 0 :
+        if player == 1:
+            return evaluate_func(state)
+        else:
+            return -evaluate_func(state)
+    
+    if maximizing:
+        value = -math.inf
+        for (x, y, newX, newY) in state.available_moves(player):
+            state_copy = deepcopy(state)
+            state_copy = state_copy.move_piece(state_copy.get_piece_at(x,y),newX, newY)
+            value = max(value, minimax(state_copy, depth - 1, alpha, beta, False, player, evaluate_func))
+            alpha = max(alpha, value)
+            if beta <= alpha:
+                break
+        return value
+    else:
+        value = math.inf
+        for (x, y, newX, newY) in state.available_moves(player):
+            state_copy = deepcopy(state)
+            state_copy = state_copy.move_piece(state_copy.get_piece_at(x,y),newX, newY)
+            value = min(value, minimax(state_copy, depth - 1, alpha, beta, True, player, evaluate_func))
+            beta = min(beta, value)
+            if beta <= alpha:
+                break
+        return value
+
+def evaluate_f1(state):
+    pieces1 = 0
+    pieces2 = 0
+    for piece in state.pieces:
+        if piece.color == RED_PIECE_COLOR:
+            if piece.removed:
+                pieces1 += 1000
+            else:
+                pieces1 += len(piece.available_moves(state))
+        elif piece.color == BLUE_PIECE_COLOR:
+            if piece.removed:
+                pieces2 += 1000
+            else:
+                pieces2 += len(piece.available_moves(state))
+    return pieces1 - pieces2
+
 game_pieces = [
     Piece(2,2,BLACK_HOLE_COLOR, 0),
     Piece(0,0,RED_PIECE_COLOR, 1),
@@ -128,7 +198,10 @@ game_pieces = [
 
 state = State(game_pieces)
 
-game = Game(state)
+#game = Game(state, execute_human_move, execute_human_move) #human vs human
+#game = Game(state, execute_human_move, execute_ai_move(4, evaluate_f1)) #human vs ai
+game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
+#game = Game(state, execute_ai_move(4, evaluate_f1), execute_ai_move(4, evaluate_f1)) #ai vs ai
 
 while True:
     game.new()
