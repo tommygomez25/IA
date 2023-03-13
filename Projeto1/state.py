@@ -1,5 +1,6 @@
 from settings import *
 import pygame
+from copy import deepcopy
 
 class State:
     
@@ -30,13 +31,15 @@ class State:
         return moves
     
     def move_piece(self,piece,x,y):
-        piece.x = x
-        piece.y = y
-        piece.selected = False
+        state_copy = deepcopy(self)
+        p = state_copy.get_piece_at(piece.x, piece.y)
+        p.x = x
+        p.y = y
+        p.selected = False
         self.selected_piece = None
-        if(piece.landed_on_black_hole()):
-            piece.removed = True
-        return self
+        if(p.landed_on_black_hole()):
+            p.removed = True
+        return state_copy
     
     def get_piece_at(self,x,y):
         for piece in self.pieces:

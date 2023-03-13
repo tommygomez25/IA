@@ -102,7 +102,7 @@ class Game:
                                     
                         if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
                             self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
-                            self.state.selected_piece = None
+                            self.selected_piece = None
                             self.turn = 3 - self.turn
                     
             else:
@@ -118,7 +118,7 @@ class Game:
                                         for p in self.state.pieces:
                                             p.selected = False
                                         piece.selected = True
-                                        state.selected_piece = piece
+                                        self.state.selected_piece = piece
             
 
 def execute_human_move(game):
@@ -126,15 +126,15 @@ def execute_human_move(game):
     game.events()
     game.update()
 
-def execute_ai_move(dififculty, evaluate_func):
+def execute_ai_move(difficulty, evaluate_func):
     def ai_move(game):
         game.clock.tick(FPS)
-        value = minimax(game.state, dififculty, -math.inf, math.inf, True, game.turn, evaluate_func)
+        value = minimax(game.state, difficulty, -math.inf, math.inf, True, game.turn, evaluate_func)
         for (x,y, newX, newY) in game.state.available_moves(game.turn):
-            state_copy = deepcopy(game.state)
-            state_copy = state_copy.move_piece(state_copy.get_piece_at(x, y),newX, newY)
-            if value == minimax(state_copy, dififculty - 1, -math.inf, math.inf, False, game.turn, evaluate_func):
+            new_state = game.state.move_piece(game.state.get_piece_at(x, y),newX, newY)
+            if value == minimax(new_state, difficulty - 1, -math.inf, math.inf, False, game.turn, evaluate_func):
                 game.state = game.state.move_piece(game.state.get_piece_at(x, y),newX, newY)
+                print("AI moved from " + str(x) + "," + str(y) + " to " + str(newX) + "," + str(newY))
                 break
         game.update()
         game.turn = 3 - game.turn
@@ -219,15 +219,10 @@ game_pieces = [
 
 state = State(game_pieces)
 
-<<<<<<< HEAD
-game = Game(state, execute_human_move, execute_human_move) #human vs human
-#game = Game(state, execute_human_move, execute_ai_move(4, evaluate_f2)) #human vs ai
-=======
 #game = Game(state, execute_human_move, execute_human_move) #human vs human
 game = Game(state, execute_human_move, execute_ai_move(5, evaluate_f3)) #human vs ai
->>>>>>> 3a878367c0af9d135f2c272f8962a8e2233e55ae
 #game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
-#game = Game(state, execute_ai_move(5, evaluate_f3), execute_ai_move(5, evaluate_f2)) #ai vs ai
+#game = Game(state, execute_ai_move(7, evaluate_f3), execute_ai_move(7, evaluate_f2)) #ai vs ai
 
 while True:
     game.new()
