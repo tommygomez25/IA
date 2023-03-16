@@ -90,11 +90,12 @@ class Game:
                         mouse_pos = pygame.mouse.get_pos()
                         # if the mouse is clicked on a friendly piece, select it
                         for piece in self.state.pieces:
+                            if (piece.color == RED_PIECE_COLOR and self.turn == 1 and piece != self.state.selected_piece )or (piece.color == BLUE_PIECE_COLOR and self.turn == 2 and piece != self.state.selected_piece):
                                 if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos):
                                     #select piece and desselect others
                                     for p in self.state.pieces:
                                         p.selected = False
-                                    print("I am going to select the piece with coordinates x: " + str(piece.x) + " y: " + str(piece.y))
+                                    print("I am going to select the piece with coordinates x: " + str(piece.x) + " y: " + str(piece.y)+ "and color: " + str(piece.color))
                                     piece.selected = True
                                     self.state.selected_piece = piece
                                     
@@ -111,7 +112,7 @@ class Game:
                     if event.button == 1:
                         mouse_pos = pygame.mouse.get_pos()
                         for piece in self.state.pieces:
-                            if piece.color == RED_PIECE_COLOR and self.turn == 1 or piece.color == BLUE_PIECE_COLOR and self.turn == 2:
+                            if (piece.color == RED_PIECE_COLOR and self.turn == 1) or (piece.color == BLUE_PIECE_COLOR and self.turn == 2):
                                 if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos) and not piece.removed:
                                     #select piece and desselect others
                                     for p in self.state.pieces:
@@ -193,7 +194,7 @@ def evaluate_f2(state):
     return pieces1 - pieces2
 
 
-#manhattan distance from center   
+# manhattan distance from center   
 def evaluate_f3(state):
     pieces1 = 0
     pieces2 = 0
@@ -267,10 +268,13 @@ def evaluate_f4(state):
                             pieces2 -= 1000
     return pieces1 - pieces2
 
+def evaluate_f5(state):
+    return evaluate_f1(state) + 10000* evaluate_f2(state) + evaluate_f3(state) + evaluate_f4(state)
+
 state = State()
 
 #game = Game(state, execute_human_move, execute_human_move) #human vs human
-game = Game(state, execute_human_move, execute_ai_move(5, evaluate_f4)) #human vs ai
+game = Game(state, execute_human_move, execute_ai_move(5, evaluate_f5)) #human vs ai
 #game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
 #game = Game(state, execute_ai_move(5, evaluate_f1), execute_ai_move(5, evaluate_f4)) #ai vs ai
 

@@ -53,8 +53,9 @@ class State:
                 p.y = y
                 p.selected = False
                 if(p.landed_on_black_hole()):
+                    p.x = -1
+                    p.y = -1
                     p.removed = True
-                    state_copy.pieces.remove(p)
                 return state_copy
         return state_copy
     
