@@ -20,29 +20,29 @@ class Piece:
                 
 
     def landed_on_black_hole(self):
-        return self.x == 2 and self.y == 2
+        return self.x == (GAME_SIZE-1)/2 and self.y == (GAME_SIZE-1)/2 
     
     def available_moves(self, state):
         moves1 = []
         moves2 = []
         moves3 = []
         moves4 = []
-        for i in range(1,5):
-            if self.x + i < 5 and not state.is_piece_at(self.x + i,self.y):
+        for i in range(1,GAME_SIZE):
+            if self.x + i < GAME_SIZE and not state.is_piece_at(self.x + i,self.y):
                 moves1.append((self.x, self.y, self.x + i,self.y))
             else:
                 break
-        for i in range(1,5):
+        for i in range(1,GAME_SIZE):
             if self.x - i >= 0 and not state.is_piece_at(self.x - i,self.y):
                 moves2.append((self.x, self.y, self.x - i,self.y))
             else:
                 break
-        for i in range(1,5):
-            if self.y + i < 5 and not state.is_piece_at(self.x,self.y + i):
+        for i in range(1,GAME_SIZE):
+            if self.y + i < GAME_SIZE and not state.is_piece_at(self.x,self.y + i):
                 moves3.append((self.x, self.y, self.x,self.y + i))
             else:
                 break
-        for i in range(1,5):
+        for i in range(1,GAME_SIZE):
             if self.y - i >= 0 and not state.is_piece_at(self.x,self.y - i):
                 moves4.append((self.x, self.y, self.x,self.y - i))
             else:
