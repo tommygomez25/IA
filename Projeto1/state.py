@@ -1,5 +1,6 @@
 from settings import *
 import pygame
+from piece import Piece
 from copy import deepcopy
 
 class State:
@@ -37,6 +38,7 @@ class State:
         p.y = y
         p.selected = False
         self.selected_piece = None
+        
         if(p.landed_on_black_hole()):
             p.removed = True
         return state_copy
@@ -57,6 +59,3 @@ class State:
                 player2_pieces += 1
         return player1_pieces == 2 or player2_pieces == 2
             
-        
-            
-    
