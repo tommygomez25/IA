@@ -46,6 +46,11 @@ def minimax(state, depth, alpha, beta, maximizing, player, evaluate_func):
         return value
 
 
+def execute_human_move(game):
+    game.clock.tick(FPS)
+    game.events()
+    game.update()
+
 def evaluate_f1(state):
     pieces1 = 0
     pieces2 = 0

@@ -1,145 +1,184 @@
 import pygame
-from piece import Piece
 from settings import *
+import game
 from state import State
-import copy
 import AI
-from copy import deepcopy
+import pygame_menu
+
+player1 = AI.execute_human_move
+player2 = AI.execute_human_move
+
+def set_player(value, p):
+    global player1, player2
+    if p == 2:
+        player2 = value
+    else:
+        player1 = value
+    return
 
 
-class Game:
-    def __init__(self,state, player1, player2):
-        pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Black Hole Escape")
-        self.clock = pygame.time.Clock()
-        self.winner = None
-        self.turn = 1
-        self.state = state
-        self.player1 = player1
-        self.player2 = player2
+def start_game():
+    global player1, player2
+    if player1 == "Computer":
+        player1 = AI.execute_ai_move(5, AI.evaluate_f1)
+    if player2 == "Computer":
+        player2 = AI.execute_ai_move(5, AI.evaluate_f1)
 
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        result.winner = self.winner
-        result.turn = self.turn
-        result.state = copy.deepcopy(self.state)
-        result.player1 = copy.deepcopy(self.player1, memo)
-        result.player2 = copy.deepcopy(self.player2, memo)
-        return result
-        
-    def new(self):
-        self.run()
+    new_game = game.Game(State(), player1, player2)
+    winner = new_game.loop()
+    display_winner(winner)
+
+
+def create_theme():
+
+    mytheme = pygame_menu.themes.THEME_DARK.copy()
+    font = pygame_menu.font.FONT_FIRACODE_BOLD
+
+    mytheme.background_color = BACKGROUND_COLOR
+    mytheme.cursor_color = (255, 255, 0)
+
+    mytheme.title_bar_style = pygame_menu.widgets.MENUBAR_STYLE_NONE
+    mytheme.title_offset = (150, 20)
+    mytheme.title_font = font
+    mytheme.title_font_size = 50
+    mytheme.title_font_color = (0, 0, 0)
+    # mytheme.title_shadow=False
+    # mytheme.title_background_color=(255,255,0)
+
+    mytheme.widget_font_size = 32
+    mytheme.widget_selection_effect = pygame_menu.widgets.HighlightSelection(
+        border_width=5, margin_x=0, margin_y=0
+    )
+    mytheme.widget_background_color = WHITE
+    mytheme.widget_font_color = BLUE_PIECE_COLOR
+    mytheme.widget_font = font
+    mytheme.widget_padding = 30
+    mytheme.widget_margin = (10, 10)
+    mytheme.selection_color = RED_PIECE_COLOR
+
+    return mytheme
+
+
+def start_menu():
+
+    menu = pygame_menu.Menu(
+        "Black-hole Escape!", SCREEN_WIDTH, SCREEN_HEIGHT, theme=create_theme()
+    )
+    menu.add.button("Play", player_menu)
+    menu.add.button("Rules", rules)
+    menu.add.button("Quit", pygame_menu.events.EXIT)
+
+    menu.mainloop(surface)
+    return
+
+
+def player_menu():
+    global player1, player2
+    player1 = AI.execute_human_move
+    player2 = AI.execute_human_move
+    players = [("Human", AI.execute_human_move), ("Computer", "Computer")]
+    menu = pygame_menu.Menu(
+        "Select Players", SCREEN_WIDTH, SCREEN_HEIGHT, theme=create_theme()
+    )
+    menu.add.button("Start Game", difficulty_menu)
+    menu.add.selector(
+        "Player1 (Red):", players, onchange=lambda value, _: set_player(value[0][1], 1)
+    )
+    menu.add.selector(
+        "Player2 (Blue):", players, onchange=lambda value, _: set_player(value[0][1], 2)
+    )
+    menu.add.button("Back", start_menu)
+    menu.add.button("Quit", pygame_menu.events.EXIT)
+
+    menu.mainloop(surface)
+    return
+
+
+def difficulty_menu():
+    global player1, player2
+    if(player1 == player2 and player1 == AI.execute_human_move): start_game()
+
+    difficulty = [
+        ("Easy", AI.execute_ai_move(5, AI.evaluate_f1)),
+        ("Medium", AI.execute_ai_move(5, AI.evaluate_f2)),
+        ("Hard", AI.execute_ai_move(5, AI.evaluate_f3)),
+    ]
+    menu = pygame_menu.Menu(
+        "Select difficulty", SCREEN_WIDTH, SCREEN_HEIGHT, theme=create_theme()
+    )
+    menu.add.button("Start Game", start_game)
+    if player1 == "Computer":
+        player1 = AI.execute_ai_move(5, AI.evaluate_f1)
+        menu.add.selector(
+            "Player1 Difficulty :",
+            difficulty,
+            onchange=lambda value, _: set_player(value[0][1], 1),
+        )
+    if player2 == "Computer":
+        player2 = AI.execute_ai_move(5, AI.evaluate_f1)
+        menu.add.selector(
+            "Player2 Difficulty :",
+            difficulty,
+            onchange=lambda value, _: set_player(value[0][1], 2),
+        )
+    menu.add.button("Back", player_menu)
+    menu.add.button("Quit", pygame_menu.events.EXIT)
+
+    menu.mainloop(surface)
+    return
+
+def rules():
+
+    menu = pygame_menu.Menu(
+        "Black-hole Escape!", SCREEN_WIDTH, SCREEN_HEIGHT, theme=create_theme()
+    )
+
+    menu.add.label(
+    "Rules:",
+    max_char=90,
+    font_size=36,
+    font_color=RED_PIECE_COLOR,
+    align=pygame_menu.locals.ALIGN_CENTER,
+    background_color=pygame.Color(255,255,255,0),
+    ).translate(0,-20)
     
-    def run(self):
-        while self.winner is None:
-            self.draw()
-            if self.turn == 1:
-                self.player1(self)
-            else:
-                self.player2(self)
-            if self.state.check_win():
-                self.winner = 3 - self.turn
-        self.display_winner()
-            
-    def update(self):
-        pass
-    
-    def draw_grid(self):
-        for row in range(0,GAME_SIZE*TILE_SIZE + TILE_SIZE, TILE_SIZE):
-            pygame.draw.line(self.screen, BLUE_PIECE_COLOR, (row,0), (row,GAME_SIZE*TILE_SIZE),7)
+    menu.add.label(
+        RULES,
+        max_char=90,
+        font_size=14,
+        font_color=BLACK_HOLE_COLOR,
+        margin=(0, 5),
+        padding=(0,0,10,0),
+        align=pygame_menu.locals.ALIGN_CENTER,
+        background_color=pygame.Color(255,255,255,0),
+    )
+    menu.add.button("Back to menu", start_menu, margin=(0,-500)).translate(0, 25)
+    menu.mainloop(surface)
+    return
 
-        for col in range(0,GAME_SIZE*TILE_SIZE + TILE_SIZE, TILE_SIZE+1):
-            pygame.draw.line(self.screen, BLUE_PIECE_COLOR, (0,col), (GAME_SIZE*TILE_SIZE,col),7)
-    
-    def draw_board(self):
-        self.state.draw(self.screen)
-        
-    def draw(self):
-        self.screen.fill(BACKGROUND_COLOR)
-        self.draw_grid()
-        self.draw_board()
-        pygame.display.flip()
+def display_winner(winner):
 
-    def display_winner(self):
-        while True:
-            self.clock.tick(FPS)
-            self.screen.fill(WHITE)
-            font = pygame.font.SysFont('Arial', 30)
-            text = font.render("Player " + str(self.winner) + " won!", True, BLACK)
-            textRect = text.get_rect()
-            textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-            self.screen.blit(text, textRect)
-            pygame.display.flip()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    quit(0)
-        
+    congrats_msg = "Player " + str(winner) + " Won!"
 
-    def events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.playing = False
-                pygame.quit()
-                quit(0)
+    menu = pygame_menu.Menu(
+        "Black-hole Escape!", SCREEN_WIDTH, SCREEN_HEIGHT, theme=create_theme()
+    )
+    menu.add.label(
+        congrats_msg,
+        max_char=-1,
+        font_size=60,
+        font_color=GREEN,
+        margin=(0, 120),
+        align=pygame_menu.locals.ALIGN_CENTER,
+        wordwrap=False,
+        background_color=BACKGROUND_COLOR,
+    )
+    menu.add.button("Play again", start_game)
+    menu.add.button("Back to menu", start_menu)
+    menu.mainloop(surface)
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.playing = False
-                    pygame.quit()
-                    quit(0)
-            
-            # if a piece is selected, listen to mouse movements and clicks to move the piece
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    mouse_pos = pygame.mouse.get_pos()
-                    # if the mouse is clicked on a friendly piece, select it
-                    for piece in self.state.pieces:
-                        if piece.color == RED_PIECE_COLOR and self.turn == 1 or piece.color == BLUE_PIECE_COLOR and self.turn == 2:
-                            if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos) and not piece.removed:
-                                # listen to mouse click to select piece
-                                if pygame.mouse.get_pressed()[0]:
-                                    #select piece and desselect others
-                                    for p in self.state.pieces:
-                                        p.selected = False
-                                    piece.selected = True
-                                    self.state.selected_piece = piece
-                                    return 
-                    if self.state.selected_piece and self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
-                        self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
-                        self.selected_piece = None
-                        self.turn = 3 - self.turn
-                        return
-                    
-            
 
-def execute_human_move(game):
-    game.clock.tick(FPS)
-    game.events()
-    game.update()
-
-game_pieces = [
-    Piece(2,2,BLACK_HOLE_COLOR, 0),
-    Piece(0,0,RED_PIECE_COLOR, 1),
-    Piece(1,1,RED_PIECE_COLOR,  1), 
-    Piece(4,0,RED_PIECE_COLOR, 1),
-    Piece(3,1,RED_PIECE_COLOR, 1), 
-    Piece(0,4,BLUE_PIECE_COLOR, 2),
-    Piece(1,3,BLUE_PIECE_COLOR, 2),
-    Piece(4,4,BLUE_PIECE_COLOR, 2),
-    Piece(3,3,BLUE_PIECE_COLOR, 2),
-]
-
-state = State()
-
-#game = Game(state, execute_human_move, execute_human_move) #human vs human
-game = Game(state, execute_human_move, AI.execute_ai_move(5, AI.evaluate_f3)) #human vs ai
-#game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
-#game = Game(state, execute_ai_move(5, evaluate_f1), execute_ai_move(5, evaluate_f4)) #ai vs ai
-
-while True:
-    game.new()
-    
+pygame.init()
+surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Black Hole Escape")
+start_menu()
