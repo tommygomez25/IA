@@ -133,12 +133,12 @@ game_pieces = [
     Piece(3,3,BLUE_PIECE_COLOR, 2),
 ]
 
-state = State(game_pieces)
+state = State()
 
 #game = Game(state, execute_human_move, execute_human_move) #human vs human
 game = Game(state, execute_human_move, AI.execute_ai_move(5, AI.evaluate_f3)) #human vs ai
 #game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
-#game = Game(state, execute_ai_move(7, evaluate_f3), execute_ai_move(7, evaluate_f2)) #ai vs ai
+#game = Game(state, execute_ai_move(5, evaluate_f1), execute_ai_move(5, evaluate_f4)) #ai vs ai
 
 while True:
     game.new()
