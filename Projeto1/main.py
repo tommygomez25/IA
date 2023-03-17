@@ -1,8 +1,7 @@
 import pygame
-from piece import Piece
+from mcts import MonteCarloTreeSearchNode
 from settings import *
 from state import State
-import math
 from copy import deepcopy
 import time
 
@@ -14,7 +13,7 @@ class Game:
         pygame.display.set_caption("Black Hole Escape")
         self.clock = pygame.time.Clock()
         self.winner = None
-        self.turn = 1
+        #self.turn = 1
         self.state = state
         self.player1 = player1
         self.player2 = player2
@@ -22,17 +21,18 @@ class Game:
     def new(self):
         self.run()
     
-    def run(self):
+    def run(self,test=False):
         while self.winner is None:
             self.draw()
-            if self.turn == 1:
+            if self.state.turn == 1:
                 self.player1(self)
             else:
                 self.player2(self)
             if self.state.check_win():
-                self.winner = 3 - self.turn
-        self.display_winner()
-            
+                self.winner = 3 - self.state.turn
+        if not test:
+            self.display_winner()
+
     def update(self):
         pass
     
@@ -90,7 +90,7 @@ class Game:
                         mouse_pos = pygame.mouse.get_pos()
                         # if the mouse is clicked on a friendly piece, select it
                         for piece in self.state.pieces:
-                            if (piece.color == RED_PIECE_COLOR and self.turn == 1 and piece != self.state.selected_piece )or (piece.color == BLUE_PIECE_COLOR and self.turn == 2 and piece != self.state.selected_piece):
+                            if (piece.color == RED_PIECE_COLOR and self.state.turn == 1 and piece != self.state.selected_piece )or (piece.color == BLUE_PIECE_COLOR and self.state.turn == 2 and piece != self.state.selected_piece):
                                 if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos):
                                     #select piece and desselect others
                                     for p in self.state.pieces:
@@ -105,97 +105,128 @@ class Game:
                             print("valid move")
                             self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
                             self.state.selected_piece = None
-                            self.turn = 3 - self.turn
                     
             else:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         mouse_pos = pygame.mouse.get_pos()
                         for piece in self.state.pieces:
-                            if (piece.color == RED_PIECE_COLOR and self.turn == 1) or (piece.color == BLUE_PIECE_COLOR and self.turn == 2):
+                            if (piece.color == RED_PIECE_COLOR and self.state.turn == 1) or (piece.color == BLUE_PIECE_COLOR and self.state.turn == 2):
                                 if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos) and not piece.removed:
                                     #select piece and desselect others
                                     for p in self.state.pieces:
                                         p.selected = False
                                     piece.selected = True
                                     self.state.selected_piece = piece
+                                    
+    def run_n_matches(self, n, max_time = 3600):
+        state_copy = deepcopy(self.state)
+        start_time = time.time()
+        
+        results = [0, 0, 0] # [draws, player 1 victories, player 2 victories]
+        print(n)
+        for i in range(n):
+            print(i)
+            self.state = deepcopy(state_copy)
+            self.run(True)
+            print("END GAME")
+            results[self.winner] += 1
+            self.winner = None
+            self.turn = 1
+            
+            if int(time.time() - start_time) > max_time:
+                print("Max time reached!")
+                break
+            
+     
+        print("\n=== Elapsed time: %s seconds ===" % (int(time.time() - start_time)))
+        print(f"  Player 1: {results[1]} victories")
+        print(f"  Player 2: {results[2]} victories")
+        print(f"  Draws: {results[0]} ")
+        print("===============================")
+        # close pygame
+        pygame.quit()
             
 
 def execute_human_move(game):
     game.clock.tick(FPS)
     game.events()
-    game.update()
 
-def execute_ai_move(difficulty, evaluate_func):
+
+def execute_ai_move(evaluate_func, depth):
     def ai_move(game):
-        game.clock.tick(FPS)
-        value = minimax(game.state, difficulty, -math.inf, math.inf, True, game.turn, evaluate_func)
-        for (x,y, newX, newY) in game.state.available_moves(game.turn):
-            new_state = game.state.move_piece(game.state.get_piece_at(x, y),newX, newY)
-            val = minimax(new_state, difficulty - 1, -math.inf, math.inf, False, game.turn, evaluate_func)
-            if value == val:
-                game.state = new_state
-                print("AI moved from " + str(x) + "," + str(y) + " to " + str(newX) + "," + str(newY))
+        value = minimax(game.state, depth, float('-inf'), float('inf'), True, game.state.turn, evaluate_func)
+        print("-------------------")
+        print("value: " + str(value))
+        for (x,y, newX, newY) in game.state.available_moves():
+            print("x: " + str(x) + " y: " + str(y) + " newX: " + str(newX) + " newY: " + str(newY))
+            v_kiko = minimax(game.state.move_piece(game.state.get_piece_at(x,y), newX, newY), depth-1, float('-inf'), float('inf'), False, game.state.turn, evaluate_func)
+            print("v_kiko: " + str(v_kiko))
+            if v_kiko == value:
+                game.state = game.state.move_piece(game.state.get_piece_at(x,y), newX, newY)
                 break
-        game.update()
-        game.turn = 3 - game.turn
+        
     return ai_move
 
+def execute_ai_move_mcts(game):
+    game.clock.tick(FPS)
+    root = MonteCarloTreeSearchNode(game.state)
+    selected_node = root.best_action()
+    #print("selected node: " + str(selected_node.state.pieces))
+    game.state = selected_node.state
+         
+        
+        
 def minimax(state, depth, alpha, beta, maximizing, player, evaluate_func):
-    if depth == 0 :
+    if depth == 0 or state.check_win():
         if player == 1:
             return evaluate_func(state)
         else:
             return -evaluate_func(state)
     
     if maximizing:
-        value = -math.inf
-        for (x, y, newX, newY) in state.available_moves(player):
-            state_copy = deepcopy(state)
-            state_copy = state_copy.move_piece(state_copy.get_piece_at(x,y),newX, newY)
-            value = max(value, minimax(state_copy, depth - 1, alpha, beta, False, player, evaluate_func))
+        value = float('-inf')
+        for (x, y, newX, newY) in state.available_moves():
+            value = max(value, minimax(state.move_piece(state.get_piece_at(x,y),newX, newY), depth - 1, alpha, beta, False, player, evaluate_func))
             alpha = max(alpha, value)
             if beta <= alpha:
                 break
         return value
     else:
-        value = math.inf
-        for (x, y, newX, newY) in state.available_moves(player):
-            state_copy = deepcopy(state)
-            state_copy = state_copy.move_piece(state_copy.get_piece_at(x,y),newX, newY)
-            value = min(value, minimax(state_copy, depth - 1, alpha, beta, True, player, evaluate_func))
+        value = float('inf')
+        for (x, y, newX, newY) in state.available_moves():
+            value = min(value, minimax(state.move_piece(state.get_piece_at(x,y),newX, newY), depth - 1, alpha, beta, True, player, evaluate_func))
             beta = min(beta, value)
             if beta <= alpha:
                 break
         return value
 
+    
 # prioritizes the number of available moves
-def evaluate_f1(state):
-    moves1 = len(state.available_moves(1))
-    moves2 = len(state.available_moves(2))
+def eval_avail_moves(state):
+    moves1 = len(state.available_moves())
+    new_state = deepcopy(state)
+    new_state.turn = 3 - new_state.turn
+    moves2 = len(new_state.available_moves())
     return moves1 - moves2
         
 
 # prioritizes the piece going to the black hole
-def evaluate_f2(state):
+def eval_black_hole(state):
     pieces1 = 0
     pieces2 = 0
     for piece in state.pieces:
-        if piece.color == RED_PIECE_COLOR:
+        if piece.color == RED_PIECE_COLOR :
             if piece.removed:
-                pieces1 += 1000
-            else:
-                pieces1 += 1
+                pieces1 += 1              
         elif piece.color == BLUE_PIECE_COLOR:
             if piece.removed:
-                pieces2 += 1000
-            else:
                 pieces2 += 1
     return pieces1 - pieces2
 
 
 # manhattan distance from center   
-def evaluate_f3(state):
+def eval_manh_dist(state):
     pieces1 = 0
     pieces2 = 0
     for piece in state.pieces:
@@ -206,78 +237,79 @@ def evaluate_f3(state):
     return -(pieces1 - pieces2)
 
 # prioritizes pieces that are central
-def evaluate_f4(state):
+def eval_central_pieces(state):
     pieces1 = 0
     pieces2 = 0
     for piece in state.pieces:
         if piece.color == RED_PIECE_COLOR:
             if (piece.x == 2 and piece.y == 1) or (piece.x == 2 and piece.y == 3) or (piece.x == 1 and piece.y == 2) or (piece.x == 3 and piece.y == 2):
-                pieces1 += 100
+                pieces1 += 1
                 # if is in central position, check opposite side and if the player has a piece there that is friendly, add 1000, otherwise subtract 1000
                 if piece.x == 2 and piece.y == 1:
                     for p in state.pieces:
-                        if p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR:
-                            pieces1 += 1000
-                        elif p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR:
-                            pieces1 -= 1000
+                        if (p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR ) or (p.x == 2 and p.y == 4 and p.color == RED_PIECE_COLOR):
+                            pieces1 += 1
+                        elif (p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR) or (p.x == 2 and p.y == 4 and p.color == BLUE_PIECE_COLOR):
+                            pieces1 -= 2
                 elif piece.x == 2 and piece.y == 3:
                     for p in state.pieces:
-                        if p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR:
-                            pieces1 += 1000
-                        elif p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR:
-                            pieces1 -= 1000
+                        if (p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR) or (p.x == 2 and p.y == 0 and p.color == RED_PIECE_COLOR):
+                            pieces1 += 1
+                        elif (p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR) or (p.x == 2 and p.y == 0 and p.color == BLUE_PIECE_COLOR):
+                            pieces1 -= 2
                 elif piece.x == 1 and piece.y == 2:
                     for p in state.pieces:
-                        if p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR:
-                            pieces1 += 1000
-                        elif p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
-                            pieces1 -= 1000
+                        if (p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR) or (p.x == 4 and p.y == 2 and p.color == RED_PIECE_COLOR):
+                            pieces1 += 1
+                        elif (p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR) or (p.x == 4 and p.y == 2 and p.color == BLUE_PIECE_COLOR):
+                            pieces1 -= 2
                 elif piece.x == 3 and piece.y == 2:
                     for p in state.pieces:
-                        if p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR:
-                            pieces1 += 1000
-                        elif p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
-                            pieces1 -= 1000 
+                        if (p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR) or (p.x == 0 and p.y == 2 and p.color == RED_PIECE_COLOR):
+                            pieces1 += 1
+                        elif (p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR) or (p.x == 0 and p.y == 2 and p.color == BLUE_PIECE_COLOR):
+                            pieces1 -= 2
         elif piece.color == BLUE_PIECE_COLOR:
             if (piece.x == 2 and piece.y == 1) or (piece.x == 2 and piece.y == 3) or (piece.x == 1 and piece.y == 2) or (piece.x == 3 and piece.y == 2):
-                pieces2 += 100
+                pieces2 += 1
                 # if is in central position, check opposite side and if the player has a piece there that is friendly, add 1000, otherwise subtract 1000
                 if piece.x == 2 and piece.y == 1:
                     for p in state.pieces:
                         if p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR:
-                            pieces2 += 1000
+                            pieces2 += 1
                         elif p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR:
-                            pieces2 -= 1000
+                            pieces2 -= 2
                 elif piece.x == 2 and piece.y == 3:
                     for p in state.pieces:
                         if p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR:
-                            pieces2 += 1000
+                            pieces2 += 1
                         elif p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR:
-                            pieces2 -= 1000
+                            pieces2 -= 2
                 elif piece.x == 1 and piece.y == 2:
                     for p in state.pieces:
                         if p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
-                            pieces2 += 1000
+                            pieces2 += 1
                         elif p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR:
-                            pieces2 -= 1000
+                            pieces2 -= 2
                 elif piece.x == 3 and piece.y == 2:
                     for p in state.pieces:
                         if p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
-                            pieces2 += 1000
+                            pieces2 += 1
                         elif p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR:
-                            pieces2 -= 1000
+                            pieces2 -= 2
     return pieces1 - pieces2
 
-def evaluate_f5(state):
-    return evaluate_f1(state) + 10000* evaluate_f2(state) + evaluate_f3(state) + evaluate_f4(state)
+def eval_mixed(state):
+    return eval_avail_moves(state) + 10000 * eval_black_hole(state) + eval_manh_dist(state) + eval_central_pieces(state)
 
 state = State()
 
 #game = Game(state, execute_human_move, execute_human_move) #human vs human
-game = Game(state, execute_human_move, execute_ai_move(5, evaluate_f5)) #human vs ai
-#game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
-#game = Game(state, execute_ai_move(5, evaluate_f1), execute_ai_move(5, evaluate_f4)) #ai vs ai
+#game = Game(state, execute_human_move, execute_ai_move(eval_mixed,3)) #human vs ai
+#game = Game(state, execute_ai_move(eval_mixed,3), execute_human_move) #ai vs human
+#game = Game(state, execute_ai_move(eval_mixed,4), execute_ai_move(eval_mixed,3)) #ai vs ai
+game = Game(state,execute_human_move, execute_ai_move_mcts)
 
-while True:
-    game.new()
-    
+game.new()
+
+#game.run_n_matches(5)   
