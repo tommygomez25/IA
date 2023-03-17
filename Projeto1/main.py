@@ -2,8 +2,8 @@ import pygame
 from piece import Piece
 from settings import *
 from state import State
-import time
-import ai
+import copy
+import AI
 from copy import deepcopy
 
 
@@ -18,7 +18,18 @@ class Game:
         self.state = state
         self.player1 = player1
         self.player2 = player2
-    
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        result.winner = self.winner
+        result.turn = self.turn
+        result.state = copy.deepcopy(self.state)
+        result.player1 = copy.deepcopy(self.player1, memo)
+        result.player2 = copy.deepcopy(self.player2, memo)
+        return result
+        
     def new(self):
         self.run()
     
@@ -125,7 +136,7 @@ game_pieces = [
 state = State(game_pieces)
 
 #game = Game(state, execute_human_move, execute_human_move) #human vs human
-game = Game(state, execute_human_move, ai.execute_ai_move(5, ai.evaluate_f2)) #human vs ai
+game = Game(state, execute_human_move, AI.execute_ai_move(5, AI.evaluate_f3)) #human vs ai
 #game = Game(state, execute_ai_move(5, evaluate_f1), execute_human_move) #ai vs human
 #game = Game(state, execute_ai_move(7, evaluate_f3), execute_ai_move(7, evaluate_f2)) #ai vs ai
 
