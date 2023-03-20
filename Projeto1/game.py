@@ -3,7 +3,7 @@ import pygame_menu
 from settings import *
 from piece import Piece
 from state import State
-import copy
+
 
 
 class Game:
@@ -13,22 +13,11 @@ class Game:
         pygame.display.set_caption("Black Hole Escape")
         self.clock = pygame.time.Clock()
         self.winner = None
-        self.turn = 1
         self.state = state
         self.playing = True
         self.player1 = player1
         self.player2 = player2
 
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        result.winner = self.winner
-        result.turn = self.turn
-        result.state = copy.deepcopy(self.state)
-        result.player1 = copy.deepcopy(self.player1, memo)
-        result.player2 = copy.deepcopy(self.player2, memo)
-        return result
         
     def loop(self):
         while self.winner == None:
@@ -47,14 +36,14 @@ class Game:
     def run(self):
         while self.winner is None:
             self.draw()
-            if self.turn == 1:
+            if self.state.turn == 1:
                 self.player1(self)
             else:
                 self.player2(self)
             if self.playing == False:
                 self.pause()
             if self.state.check_win():
-                self.winner = 3 - self.turn
+                self.winner = 3 - self.state.turn
             
     def update(self):
         pass
@@ -93,7 +82,7 @@ class Game:
                     mouse_pos = pygame.mouse.get_pos()
                     # if the mouse is clicked on a friendly piece, select it
                     for piece in self.state.pieces:
-                        if piece.color == RED_PIECE_COLOR and self.turn == 1 or piece.color == BLUE_PIECE_COLOR and self.turn == 2:
+                        if piece.color == RED_PIECE_COLOR and self.state.turn == 1 or piece.color == BLUE_PIECE_COLOR and self.state.turn == 2:
                             if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos) and not piece.removed:
                                 # listen to mouse click to select piece
                                 if pygame.mouse.get_pressed()[0]:
@@ -106,7 +95,6 @@ class Game:
                     if self.state.selected_piece and self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
                         self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
                         self.selected_piece = None
-                        self.turn = 3 - self.turn
                         return
 
 game_pieces = [

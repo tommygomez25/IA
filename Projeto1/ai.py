@@ -1,49 +1,56 @@
 import math
 from settings import *
 from copy import deepcopy
+import random
+from montecarlo import *
 
-def execute_ai_move(difficulty, evaluate_func):
+def execute_ai_move(evaluate_func, depth):
     def ai_move(game):
-        game.clock.tick(FPS)
-        game.state.selected_piece = None
-        value = minimax(game.state, difficulty, -math.inf, math.inf, True, game.turn, evaluate_func)
-        for (x,y, newX, newY) in game.state.available_moves(game.turn):
-            new_state = game.state.move_piece(game.state.get_piece_at(x, y),newX, newY)
-            if value == minimax(new_state, difficulty - 1, -math.inf, math.inf, False, game.turn, evaluate_func):
-                game.state = game.state.move_piece(game.state.get_piece_at(x, y),newX, newY)
-                print("AI moved from " + str(x) + "," + str(y) + " to " + str(newX) + "," + str(newY))
-                break
-        game.update()
-        game.turn = 3 - game.turn
-    return ai_move
-
+        value = minimax(game.state, depth, float('-inf'), float('inf'), True, game.state.turn, evaluate_func)
+        plays = []
+        if len(game.state.available_moves()) == 0:
+            return
+        for (x,y, newX, newY) in game.state.available_moves():
+            if minimax(game.state.move_piece(game.state.get_piece_at(x,y), newX, newY), depth-1, float('-inf'), float('inf'), False, game.state.turn, evaluate_func) == value:
+                plays.append(game.state.move_piece(game.state.get_piece_at(x,y), newX, newY))
+        game.state = random.choice(plays)
+    return ai_move         
+        
+        
 def minimax(state, depth, alpha, beta, maximizing, player, evaluate_func):
-    if depth == 0 :
+    if depth == 0 or state.check_win():
         if player == 1:
             return evaluate_func(state)
         else:
             return -evaluate_func(state)
     
     if maximizing:
-        value = -math.inf
-        for (x, y, newX, newY) in state.available_moves(player):
-            state_copy = deepcopy(state)
-            state_copy = state_copy.move_piece(state_copy.get_piece_at(x,y),newX, newY)
-            value = max(value, minimax(state_copy, depth - 1, alpha, beta, False, player, evaluate_func))
+        value = float('-inf')
+        for (x, y, newX, newY) in state.available_moves():
+            value = max(value, minimax(state.move_piece(state.get_piece_at(x,y),newX, newY), depth - 1, alpha, beta, False, player, evaluate_func))
             alpha = max(alpha, value)
             if beta <= alpha:
                 break
         return value
     else:
-        value = math.inf
-        for (x, y, newX, newY) in state.available_moves(player):
-            state_copy = deepcopy(state)
-            state_copy = state_copy.move_piece(state_copy.get_piece_at(x,y),newX, newY)
-            value = min(value, minimax(state_copy, depth - 1, alpha, beta, True, player, evaluate_func))
+        value = float('inf')
+        for (x, y, newX, newY) in state.available_moves():
+            value = min(value, minimax(state.move_piece(state.get_piece_at(x,y),newX, newY), depth - 1, alpha, beta, True, player, evaluate_func))
             beta = min(beta, value)
             if beta <= alpha:
                 break
         return value
+
+def execute_monte_carlo_move():
+    def ai_move(game):
+        game.clock.tick(FPS)
+        root = UctMctsAgent(game.state)
+        root.search(10)
+        move = root.best_move()
+        num_rollouts, node_count, run_time = root.statistics()
+        game.state = game.state.move_piece(game.state.get_piece_at(move[0], move[1]), move[2], move[3])
+        print("Number of rollouts: ", num_rollouts)
+    return ai_move
 
 
 def execute_human_move(game):
@@ -54,6 +61,7 @@ def execute_human_move(game):
 def evaluate_f1(state):
     pieces1 = 0
     pieces2 = 0
+
     for piece in state.pieces:
         if piece.color == RED_PIECE_COLOR:
             if piece.removed:

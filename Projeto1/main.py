@@ -1,12 +1,15 @@
 import pygame
+from mcts import MonteCarloTreeSearchNode
 from settings import *
 import game
 from state import State
-import AI
+import ai
 import pygame_menu
+from copy import deepcopy
+import time
 
-player1 = AI.execute_human_move
-player2 = AI.execute_human_move
+player1 = ai.execute_human_move
+player2 = ai.execute_human_move
 
 def set_player(value, p):
     global player1, player2
@@ -20,9 +23,9 @@ def set_player(value, p):
 def start_game():
     global player1, player2
     if player1 == "Computer":
-        player1 = AI.execute_ai_move(5, AI.evaluate_f1)
+        player1 = ai.execute_monte_carlo_move()
     if player2 == "Computer":
-        player2 = AI.execute_ai_move(5, AI.evaluate_f1)
+        player2 = ai.execute_monte_carlo_move()
 
     new_game = game.Game(State(), player1, player2)
     winner = new_game.loop()
@@ -74,9 +77,9 @@ def start_menu():
 
 def player_menu():
     global player1, player2
-    player1 = AI.execute_human_move
-    player2 = AI.execute_human_move
-    players = [("Human", AI.execute_human_move), ("Computer", "Computer")]
+    player1 = ai.execute_human_move
+    player2 = ai.execute_human_move
+    players = [("Human", ai.execute_human_move), ("Computer", "Computer")]
     menu = pygame_menu.Menu(
         "Select Players", SCREEN_WIDTH, SCREEN_HEIGHT, theme=create_theme()
     )
@@ -96,26 +99,26 @@ def player_menu():
 
 def difficulty_menu():
     global player1, player2
-    if(player1 == player2 and player1 == AI.execute_human_move): start_game()
+    if(player1 == player2 and player1 == ai.execute_human_move): start_game()
 
     difficulty = [
-        ("Easy", AI.execute_ai_move(5, AI.evaluate_f1)),
-        ("Medium", AI.execute_ai_move(5, AI.evaluate_f2)),
-        ("Hard", AI.execute_ai_move(5, AI.evaluate_f3)),
+        ("Easy", ai.execute_monte_carlo_move()),
+        ("Medium", ai.execute_monte_carlo_move()),
+        ("Hard", ai.execute_monte_carlo_move()),
     ]
     menu = pygame_menu.Menu(
         "Select difficulty", SCREEN_WIDTH, SCREEN_HEIGHT, theme=create_theme()
     )
     menu.add.button("Start Game", start_game)
     if player1 == "Computer":
-        player1 = AI.execute_ai_move(5, AI.evaluate_f1)
+        player1 = ai.execute_monte_carlo_move()
         menu.add.selector(
             "Player1 Difficulty :",
             difficulty,
             onchange=lambda value, _: set_player(value[0][1], 1),
         )
     if player2 == "Computer":
-        player2 = AI.execute_ai_move(5, AI.evaluate_f1)
+        player2 = ai.execute_monte_carlo_move()
         menu.add.selector(
             "Player2 Difficulty :",
             difficulty,
