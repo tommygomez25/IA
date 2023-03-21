@@ -161,16 +161,8 @@ def eval_central_pieces(state):
                             pieces2 -= 2
     return pieces1 - pieces2
 
-def eval_winner(state):
-    if state.get_winner() == 1:
-        return 100000
-    elif state.get_winner() == 2:
-        return -100000
-    else:
-        return 0
-
 def eval_mixed(state):
-    return eval_manh_dist(state) + eval_winner(state) + eval_avail_moves(state)
+    return eval_manh_dist(state) + eval_avail_moves(state)
 
 def eval_mixed2(state):
     return eval_manh_dist(state) + eval_central_pieces(state) + eval_avail_moves(state)
