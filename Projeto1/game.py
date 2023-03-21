@@ -76,26 +76,41 @@ class Game:
                     self.playing = False
                     return 0
             
-            # if a piece is selected, listen to mouse movements and clicks to move the piece
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    mouse_pos = pygame.mouse.get_pos()
-                    # if the mouse is clicked on a friendly piece, select it
-                    for piece in self.state.pieces:
-                        if piece.color == RED_PIECE_COLOR and self.state.turn == 1 or piece.color == BLUE_PIECE_COLOR and self.state.turn == 2:
-                            if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos) and not piece.removed:
-                                # listen to mouse click to select piece
-                                if pygame.mouse.get_pressed()[0]:
+             # if a piece is selected, listen to mouse movements and clicks to move the piece
+            if self.state.selected_piece != None:
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        mouse_pos = pygame.mouse.get_pos()
+                        # if the mouse is clicked on a friendly piece, select it
+                        for piece in self.state.pieces:
+                            if (piece.color == RED_PIECE_COLOR and self.state.turn == 1 and piece != self.state.selected_piece )or (piece.color == BLUE_PIECE_COLOR and self.state.turn == 2 and piece != self.state.selected_piece):
+                                if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos):
+                                    #select piece and desselect others
+                                    for p in self.state.pieces:
+                                        p.selected = False
+                                    
+                                    self.state.selected_piece = piece
+                                    
+                                        
+ 
+                        if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
+                            
+                            self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
+                            self.state.selected_piece = None
+                    
+            else:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        mouse_pos = pygame.mouse.get_pos()
+                        for piece in self.state.pieces:
+                            if (piece.color == RED_PIECE_COLOR and self.state.turn == 1) or (piece.color == BLUE_PIECE_COLOR and self.state.turn == 2):
+                                if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos) and not piece.removed:
                                     #select piece and desselect others
                                     for p in self.state.pieces:
                                         p.selected = False
                                     piece.selected = True
                                     self.state.selected_piece = piece
-                                    return 
-                    if self.state.selected_piece and self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
-                        self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
-                        self.selected_piece = None
-                        return
 
 game_pieces = [
     Piece(2,2,BLACK_HOLE_COLOR, 0),

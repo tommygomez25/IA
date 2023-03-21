@@ -41,6 +41,9 @@ class UctMctsAgent:
         if self.root_state.get_outcome() != PLAYERS['none']:
             return -1
 
+        # print the values and respective move of self.root.children
+        for v in self.root.children.values():
+            print("Value :" + str(v.move))
         # choose the move of the most simulated node breaking ties randomly
         max_value = max(self.root.children.values(), key=lambda n: n.N).N
         max_nodes = [n for n in self.root.children.values() if n.N == max_value]
@@ -139,6 +142,7 @@ class UctMctsAgent:
         node_count = self.tree_size()
         self.node_count = node_count
         self.num_rollouts = num_rollouts
+        self.run_time = run_time
     
     
     def tree_size(self) -> int:
