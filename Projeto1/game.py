@@ -89,7 +89,7 @@ class Game:
                                     #select piece and desselect others
                                     for p in self.state.pieces:
                                         p.selected = False
-                                    
+                                    piece.selected = True
                                     self.state.selected_piece = piece
                                     
                                         
