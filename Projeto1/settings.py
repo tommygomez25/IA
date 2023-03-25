@@ -10,7 +10,7 @@ GREY = (128,128,128)
 YELLOW = (255,255,0)
 GREEN = (0,255,0)
 BLACK = (0,0,0)
-GAME_SIZE = 5
+GAME_SIZE = 9
 TILE_SIZE = (((SCREEN_HEIGHT+SCREEN_WIDTH)//2)//GAME_SIZE+2)
 
 RULES= "This game is a two player game. Game is played on a 5x5 board. The middle square of the board is accepted as a black hole. \
