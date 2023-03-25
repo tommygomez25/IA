@@ -3,6 +3,8 @@ import pygame_menu
 from settings import *
 from piece import Piece
 from state import State
+import time
+from copy import deepcopy
 
 
 
@@ -63,6 +65,34 @@ class Game:
         self.draw_grid()
         self.draw_board()
         pygame.display.flip()
+
+    def run_n_matches(self, n, max_time = 3600):
+        state_copy = deepcopy(self.state)
+        start_time = time.time()
+        
+        results = [0, 0, 0] # [draws, player 1 victories, player 2 victories]
+        print(n)
+        for i in range(n):
+            print(i)
+            self.state = deepcopy(state_copy)
+            self.run(True)
+            print("END GAME")
+            results[self.winner] += 1
+            self.winner = None
+            self.turn = 1
+            
+            if int(time.time() - start_time) > max_time:
+                print("Max time reached!")
+                break
+            
+     
+        print("\n=== Elapsed time: %s seconds ===" % (int(time.time() - start_time)))
+        print(f"  Player 1: {results[1]} victories")
+        print(f"  Player 2: {results[2]} victories")
+        print(f"  Draws: {results[0]} ")
+        print("===============================")
+        # close pygame
+        pygame.quit()
 
     def events(self):
         for event in pygame.event.get():
