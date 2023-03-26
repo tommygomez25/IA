@@ -130,68 +130,6 @@ def eval_central_pieces(state):
 
     return pieces1 - pieces2
 
-
-# prioritizes pieces that are central
-# def eval_central_pieces(state):
-#     pieces1 = 0
-#     pieces2 = 0
-#     for piece in state.pieces:
-#         if piece.color == RED_PIECE_COLOR:
-#             if (piece.x == 2 and piece.y == 1) or (piece.x == 2 and piece.y == 3) or (piece.x == 1 and piece.y == 2) or (piece.x == 3 and piece.y == 2):
-#                 pieces1 += 1
-#                 if piece.x == 2 and piece.y == 1:
-#                     for p in state.pieces:
-#                         if (p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR ) or (p.x == 2 and p.y == 4 and p.color == RED_PIECE_COLOR):
-#                             pieces1 += 1
-#                         elif (p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR) or (p.x == 2 and p.y == 4 and p.color == BLUE_PIECE_COLOR):
-#                             pieces1 -= 2
-#                 elif piece.x == 2 and piece.y == 3:
-#                     for p in state.pieces:
-#                         if (p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR) or (p.x == 2 and p.y == 0 and p.color == RED_PIECE_COLOR):
-#                             pieces1 += 1
-#                         elif (p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR) or (p.x == 2 and p.y == 0 and p.color == BLUE_PIECE_COLOR):
-#                             pieces1 -= 2
-#                 elif piece.x == 1 and piece.y == 2:
-#                     for p in state.pieces:
-#                         if (p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR) or (p.x == 4 and p.y == 2 and p.color == RED_PIECE_COLOR):
-#                             pieces1 += 1
-#                         elif (p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR) or (p.x == 4 and p.y == 2 and p.color == BLUE_PIECE_COLOR):
-#                             pieces1 -= 2
-#                 elif piece.x == 3 and piece.y == 2:
-#                     for p in state.pieces:
-#                         if (p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR) or (p.x == 0 and p.y == 2 and p.color == RED_PIECE_COLOR):
-#                             pieces1 += 1
-#                         elif (p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR) or (p.x == 0 and p.y == 2 and p.color == BLUE_PIECE_COLOR):
-#                             pieces1 -= 2
-#         elif piece.color == BLUE_PIECE_COLOR:
-#             if (piece.x == 2 and piece.y == 1) or (piece.x == 2 and piece.y == 3) or (piece.x == 1 and piece.y == 2) or (piece.x == 3 and piece.y == 2):
-#                 pieces2 += 1
-#                 if piece.x == 2 and piece.y == 1:
-#                     for p in state.pieces:
-#                         if p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR:
-#                             pieces2 += 1
-#                         elif p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR:
-#                             pieces2 -= 2
-#                 elif piece.x == 2 and piece.y == 3:
-#                     for p in state.pieces:
-#                         if p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR:
-#                             pieces2 += 1
-#                         elif p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR:
-#                             pieces2 -= 2
-#                 elif piece.x == 1 and piece.y == 2:
-#                     for p in state.pieces:
-#                         if p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
-#                             pieces2 += 1
-#                         elif p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR:
-#                             pieces2 -= 2
-#                 elif piece.x == 3 and piece.y == 2:
-#                     for p in state.pieces:
-#                         if p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
-#                             pieces2 += 1
-#                         elif p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR:
-#                             pieces2 -= 2
-#     return pieces1 - pieces2
-
 def eval_mixed(state):
     return eval_manh_dist(state) + eval_avail_moves(state)
 

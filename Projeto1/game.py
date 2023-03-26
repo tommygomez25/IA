@@ -25,15 +25,6 @@ class Game:
         while self.winner == None:
             self.run()
         return self.winner
-    
-
-    # def pause(self):
-    #     pause_theme = pygame_menu.Theme(settings.BACKGROUND_COLOR=(255, 255, 255, 200))
-    #     menu = pygame_menu.Menu('Black-hole Escape!', SCREEN_WIDTH, SCREEN_HEIGHT, theme=pause_theme)
-    #     menu.add.button('Return to game', action=lambda self: self.playing:=False)
-    #     menu.add.button('Back to menu')
-    #     menu.add.button('Quit', pygame_menu.events.EXIT)
-    #     menu.mainloop(self.screen)
 
     def run(self):
         while self.winner is None:
