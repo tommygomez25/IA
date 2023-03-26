@@ -56,6 +56,7 @@ def execute_monte_carlo_move():
 def execute_human_move(game):
     game.clock.tick(FPS)
     game.events()
+    #print("Game_size:", Game_size//2)
     game.update()
 
 # prioritizes the number of available moves
@@ -83,83 +84,113 @@ def eval_black_hole(state):
 
 # manhattan distance from center   
 def eval_manh_dist(state):
+    bh = Game_size//2//2
     pieces1 = 0
     pieces2 = 0
     for piece in state.pieces:
         if piece.color == RED_PIECE_COLOR:
             if not piece.removed:
-                pieces1 += abs(piece.x - 2) + abs(piece.y - 2)
+                pieces1 += abs(piece.x - bh) + abs(piece.y - bh)
             else:
                 pieces1 -= 10
         elif piece.color == BLUE_PIECE_COLOR:
             if not piece.removed:
-                pieces2 += abs(piece.x - 2) + abs(piece.y - 2)
+                pieces2 += abs(piece.x - bh) + abs(piece.y - bh)
             else:
                 pieces2 -= 10
     return -(pieces1 - pieces2)
 
-# prioritizes pieces that are central
 def eval_central_pieces(state):
-    pieces1 = 0
-    pieces2 = 0
-    for piece in state.pieces:
-        if piece.color == RED_PIECE_COLOR:
-            if (piece.x == 2 and piece.y == 1) or (piece.x == 2 and piece.y == 3) or (piece.x == 1 and piece.y == 2) or (piece.x == 3 and piece.y == 2):
-                pieces1 += 1
-                # if is in central position, check opposite side and if the player has a piece there that is friendly, add 1000, otherwise subtract 1000
-                if piece.x == 2 and piece.y == 1:
-                    for p in state.pieces:
-                        if (p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR ) or (p.x == 2 and p.y == 4 and p.color == RED_PIECE_COLOR):
-                            pieces1 += 1
-                        elif (p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR) or (p.x == 2 and p.y == 4 and p.color == BLUE_PIECE_COLOR):
-                            pieces1 -= 2
-                elif piece.x == 2 and piece.y == 3:
-                    for p in state.pieces:
-                        if (p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR) or (p.x == 2 and p.y == 0 and p.color == RED_PIECE_COLOR):
-                            pieces1 += 1
-                        elif (p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR) or (p.x == 2 and p.y == 0 and p.color == BLUE_PIECE_COLOR):
-                            pieces1 -= 2
-                elif piece.x == 1 and piece.y == 2:
-                    for p in state.pieces:
-                        if (p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR) or (p.x == 4 and p.y == 2 and p.color == RED_PIECE_COLOR):
-                            pieces1 += 1
-                        elif (p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR) or (p.x == 4 and p.y == 2 and p.color == BLUE_PIECE_COLOR):
-                            pieces1 -= 2
-                elif piece.x == 3 and piece.y == 2:
-                    for p in state.pieces:
-                        if (p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR) or (p.x == 0 and p.y == 2 and p.color == RED_PIECE_COLOR):
-                            pieces1 += 1
-                        elif (p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR) or (p.x == 0 and p.y == 2 and p.color == BLUE_PIECE_COLOR):
-                            pieces1 -= 2
-        elif piece.color == BLUE_PIECE_COLOR:
-            if (piece.x == 2 and piece.y == 1) or (piece.x == 2 and piece.y == 3) or (piece.x == 1 and piece.y == 2) or (piece.x == 3 and piece.y == 2):
-                pieces2 += 1
-                # if is in central position, check opposite side and if the player has a piece there that is friendly, add 1000, otherwise subtract 1000
-                if piece.x == 2 and piece.y == 1:
-                    for p in state.pieces:
-                        if p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR:
-                            pieces2 += 1
-                        elif p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR:
-                            pieces2 -= 2
-                elif piece.x == 2 and piece.y == 3:
-                    for p in state.pieces:
-                        if p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR:
-                            pieces2 += 1
-                        elif p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR:
-                            pieces2 -= 2
-                elif piece.x == 1 and piece.y == 2:
-                    for p in state.pieces:
-                        if p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
-                            pieces2 += 1
-                        elif p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR:
-                            pieces2 -= 2
-                elif piece.x == 3 and piece.y == 2:
-                    for p in state.pieces:
-                        if p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
-                            pieces2 += 1
-                        elif p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR:
-                            pieces2 -= 2
+    bh = Game_size//2
+    central_pos = [(bh, bh-1), (bh, bh+1), (bh-1, bh), (bh+1, bh)]
+    def calc_score(state, piece, color):
+        score = 0
+        if piece.color == color:
+            if (piece.x, piece.y) in central_pos:
+                score += 1
+                opp_color = BLUE_PIECE_COLOR if color == RED_PIECE_COLOR else RED_PIECE_COLOR
+                if piece.x == 1:
+                    opposite_x, opposite_y = central_pos[3]
+                elif piece.x == 3:
+                    opposite_x, opposite_y = central_pos[2]
+                elif piece.y == 1:
+                    opposite_x, opposite_y = central_pos[1]
+                elif piece.y == 3:
+                    opposite_x, opposite_y = central_pos[0]
+                for p in state.pieces:
+                    if (p.x, p.y) == (opposite_x, opposite_y):
+                        if p.color == color:
+                            score += 1000
+                        elif p.color == opp_color:
+                            score -= 1000
+        return score
+
+    pieces1 = sum(calc_score(state, piece, RED_PIECE_COLOR) for piece in state.pieces)
+    pieces2 = sum(calc_score(state, piece, BLUE_PIECE_COLOR) for piece in state.pieces)
+
     return pieces1 - pieces2
+
+
+# prioritizes pieces that are central
+# def eval_central_pieces(state):
+#     pieces1 = 0
+#     pieces2 = 0
+#     for piece in state.pieces:
+#         if piece.color == RED_PIECE_COLOR:
+#             if (piece.x == 2 and piece.y == 1) or (piece.x == 2 and piece.y == 3) or (piece.x == 1 and piece.y == 2) or (piece.x == 3 and piece.y == 2):
+#                 pieces1 += 1
+#                 if piece.x == 2 and piece.y == 1:
+#                     for p in state.pieces:
+#                         if (p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR ) or (p.x == 2 and p.y == 4 and p.color == RED_PIECE_COLOR):
+#                             pieces1 += 1
+#                         elif (p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR) or (p.x == 2 and p.y == 4 and p.color == BLUE_PIECE_COLOR):
+#                             pieces1 -= 2
+#                 elif piece.x == 2 and piece.y == 3:
+#                     for p in state.pieces:
+#                         if (p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR) or (p.x == 2 and p.y == 0 and p.color == RED_PIECE_COLOR):
+#                             pieces1 += 1
+#                         elif (p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR) or (p.x == 2 and p.y == 0 and p.color == BLUE_PIECE_COLOR):
+#                             pieces1 -= 2
+#                 elif piece.x == 1 and piece.y == 2:
+#                     for p in state.pieces:
+#                         if (p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR) or (p.x == 4 and p.y == 2 and p.color == RED_PIECE_COLOR):
+#                             pieces1 += 1
+#                         elif (p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR) or (p.x == 4 and p.y == 2 and p.color == BLUE_PIECE_COLOR):
+#                             pieces1 -= 2
+#                 elif piece.x == 3 and piece.y == 2:
+#                     for p in state.pieces:
+#                         if (p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR) or (p.x == 0 and p.y == 2 and p.color == RED_PIECE_COLOR):
+#                             pieces1 += 1
+#                         elif (p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR) or (p.x == 0 and p.y == 2 and p.color == BLUE_PIECE_COLOR):
+#                             pieces1 -= 2
+#         elif piece.color == BLUE_PIECE_COLOR:
+#             if (piece.x == 2 and piece.y == 1) or (piece.x == 2 and piece.y == 3) or (piece.x == 1 and piece.y == 2) or (piece.x == 3 and piece.y == 2):
+#                 pieces2 += 1
+#                 if piece.x == 2 and piece.y == 1:
+#                     for p in state.pieces:
+#                         if p.x == 2 and p.y == 3 and p.color == BLUE_PIECE_COLOR:
+#                             pieces2 += 1
+#                         elif p.x == 2 and p.y == 3 and p.color == RED_PIECE_COLOR:
+#                             pieces2 -= 2
+#                 elif piece.x == 2 and piece.y == 3:
+#                     for p in state.pieces:
+#                         if p.x == 2 and p.y == 1 and p.color == BLUE_PIECE_COLOR:
+#                             pieces2 += 1
+#                         elif p.x == 2 and p.y == 1 and p.color == RED_PIECE_COLOR:
+#                             pieces2 -= 2
+#                 elif piece.x == 1 and piece.y == 2:
+#                     for p in state.pieces:
+#                         if p.x == 3 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
+#                             pieces2 += 1
+#                         elif p.x == 3 and p.y == 2 and p.color == RED_PIECE_COLOR:
+#                             pieces2 -= 2
+#                 elif piece.x == 3 and piece.y == 2:
+#                     for p in state.pieces:
+#                         if p.x == 1 and p.y == 2 and p.color == BLUE_PIECE_COLOR:
+#                             pieces2 += 1
+#                         elif p.x == 1 and p.y == 2 and p.color == RED_PIECE_COLOR:
+#                             pieces2 -= 2
+#     return pieces1 - pieces2
 
 def eval_mixed(state):
     return eval_manh_dist(state) + eval_avail_moves(state)
