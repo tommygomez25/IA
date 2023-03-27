@@ -22,3 +22,9 @@ The ships are in a weird dimension and their brake motors are not working. \
 For this reason if a piece is moved, must move until stopped by an other piece or by the borders of the board. \
 Players try to land their ships on the black hole. The ship landed on this square pass to another dimension and removed from the board. \
 The ships can pass over the black hole, but for removing it must land on this square. The player who rescue first his/her two ships from this dimension win the game."
+
+def set_game_size(val):
+    global Game_size,Tile_size
+    Game_size = val
+    Tile_size = (((SCREEN_HEIGHT+SCREEN_WIDTH)//2)//Game_size+2)
+    return

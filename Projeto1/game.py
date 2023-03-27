@@ -1,6 +1,6 @@
 import pygame
 import pygame_menu
-from settings import *
+import settings
 from piece import Piece
 from state import State
 import time
@@ -11,7 +11,7 @@ from copy import deepcopy
 class Game:
     def __init__(self,state, player1, player2):
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
         pygame.display.set_caption("Black Hole Escape")
         self.clock = pygame.time.Clock()
         self.winner = None
@@ -25,15 +25,6 @@ class Game:
         while self.winner == None:
             self.run()
         return self.winner
-    
-
-    # def pause(self):
-    #     pause_theme = pygame_menu.Theme(background_color=(255, 255, 255, 200))
-    #     menu = pygame_menu.Menu('Black-hole Escape!', SCREEN_WIDTH, SCREEN_HEIGHT, theme=pause_theme)
-    #     menu.add.button('Return to game', action=lambda self: self.playing:=False)
-    #     menu.add.button('Back to menu')
-    #     menu.add.button('Quit', pygame_menu.events.EXIT)
-    #     menu.mainloop(self.screen)
 
     def run(self):
         while self.winner is None:
@@ -51,17 +42,17 @@ class Game:
         pass
     
     def draw_grid(self):
-        for row in range(0,GAME_SIZE*TILE_SIZE + TILE_SIZE, TILE_SIZE):
-            pygame.draw.line(self.screen, BLUE_PIECE_COLOR, (row,0), (row,GAME_SIZE*TILE_SIZE),7)
+        for row in range(0,settings.Game_size*settings.Tile_size + settings.Tile_size, settings.Tile_size):
+            pygame.draw.line(self.screen, settings.BLUE_PIECE_COLOR, (row,0), (row,settings.Game_size*settings.Tile_size),7)
 
-        for col in range(0,GAME_SIZE*TILE_SIZE + TILE_SIZE, TILE_SIZE+1):
-            pygame.draw.line(self.screen, BLUE_PIECE_COLOR, (0,col), (GAME_SIZE*TILE_SIZE,col),7)
+        for col in range(0,settings.Game_size*settings.Tile_size + settings.Tile_size, settings.Tile_size+1):
+            pygame.draw.line(self.screen, settings.BLUE_PIECE_COLOR, (0,col), (settings.Game_size*settings.Tile_size,col),7)
     
     def draw_board(self):
         self.state.draw(self.screen)
         
     def draw(self):
-        self.screen.fill(BACKGROUND_COLOR)
+        self.screen.fill(settings.BACKGROUND_COLOR)
         self.draw_grid()
         self.draw_board()
         pygame.display.flip()
@@ -114,8 +105,8 @@ class Game:
                         mouse_pos = pygame.mouse.get_pos()
                         # if the mouse is clicked on a friendly piece, select it
                         for piece in self.state.pieces:
-                            if (piece.color == RED_PIECE_COLOR and self.state.turn == 1 and piece != self.state.selected_piece )or (piece.color == BLUE_PIECE_COLOR and self.state.turn == 2 and piece != self.state.selected_piece):
-                                if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos):
+                            if (piece.color == settings.RED_PIECE_COLOR and self.state.turn == 1 and piece != self.state.selected_piece )or (piece.color == settings.BLUE_PIECE_COLOR and self.state.turn == 2 and piece != self.state.selected_piece):
+                                if pygame.Rect(piece.x*settings.Tile_size, piece.y*settings.Tile_size, settings.Tile_size, settings.Tile_size).collidepoint(mouse_pos):
                                     #select piece and desselect others
                                     for p in self.state.pieces:
                                         p.selected = False
@@ -124,9 +115,9 @@ class Game:
                                     
                                         
  
-                        if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE):
+                        if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // settings.Tile_size, mouse_pos[1] // settings.Tile_size):
                             
-                            self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // TILE_SIZE, mouse_pos[1] // TILE_SIZE)
+                            self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // settings.Tile_size, mouse_pos[1] // settings.Tile_size)
                             self.state.selected_piece = None
                     
             else:
@@ -134,8 +125,8 @@ class Game:
                     if event.button == 1:
                         mouse_pos = pygame.mouse.get_pos()
                         for piece in self.state.pieces:
-                            if (piece.color == RED_PIECE_COLOR and self.state.turn == 1) or (piece.color == BLUE_PIECE_COLOR and self.state.turn == 2):
-                                if pygame.Rect(piece.x*TILE_SIZE, piece.y*TILE_SIZE, TILE_SIZE, TILE_SIZE).collidepoint(mouse_pos) and not piece.removed:
+                            if (piece.color == settings.RED_PIECE_COLOR and self.state.turn == 1) or (piece.color == settings.BLUE_PIECE_COLOR and self.state.turn == 2):
+                                if pygame.Rect(piece.x*settings.Tile_size, piece.y*settings.Tile_size, settings.Tile_size, settings.Tile_size).collidepoint(mouse_pos) and not piece.removed:
                                     #select piece and desselect others
                                     for p in self.state.pieces:
                                         p.selected = False
@@ -143,15 +134,15 @@ class Game:
                                     self.state.selected_piece = piece
 
 game_pieces = [
-    Piece(2,2,BLACK_HOLE_COLOR, 0),
-    Piece(0,0,RED_PIECE_COLOR, 1),
-    Piece(1,1,RED_PIECE_COLOR,  1), 
-    Piece(4,0,RED_PIECE_COLOR, 1),
-    Piece(3,1,RED_PIECE_COLOR, 1), 
-    Piece(0,4,BLUE_PIECE_COLOR, 2),
-    Piece(1,3,BLUE_PIECE_COLOR, 2),
-    Piece(4,4,BLUE_PIECE_COLOR, 2),
-    Piece(3,3,BLUE_PIECE_COLOR, 2),
+    Piece(2,2,settings.BLACK_HOLE_COLOR, 0),
+    Piece(0,0,settings.RED_PIECE_COLOR, 1),
+    Piece(1,1,settings.RED_PIECE_COLOR,  1), 
+    Piece(4,0,settings.RED_PIECE_COLOR, 1),
+    Piece(3,1,settings.RED_PIECE_COLOR, 1), 
+    Piece(0,4,settings.BLUE_PIECE_COLOR, 2),
+    Piece(1,3,settings.BLUE_PIECE_COLOR, 2),
+    Piece(4,4,settings.BLUE_PIECE_COLOR, 2),
+    Piece(3,3,settings.BLUE_PIECE_COLOR, 2),
 ]
 
     
