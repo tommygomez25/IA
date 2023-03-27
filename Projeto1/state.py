@@ -1,5 +1,4 @@
 import settings
-import pygame
 from piece import Piece
 from copy import deepcopy
 from piece import Piece
@@ -23,6 +22,10 @@ class State:
                     
         self.selected_piece = None
         self.turn = 1
+        self.p1_moves = 0
+        self.p2_moves = 0
+        self.p1_last_moves = []
+        self.p2_last_moves = []
     
     def draw(self,screen):
         for piece in self.pieces:
@@ -61,6 +64,10 @@ class State:
                     p.removed = True
                 state_copy.turn = 3 - state_copy.turn
                 return state_copy
+        if self.turn == 1:
+            self.p1_moves += 1
+        else:
+            self.p2_moves += 1
         return state_copy
     
     def get_piece_at(self,x,y):

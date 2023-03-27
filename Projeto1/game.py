@@ -1,8 +1,6 @@
 import pygame
-import pygame_menu
 import settings
 from piece import Piece
-from state import State
 import time
 from copy import deepcopy
 
@@ -20,7 +18,6 @@ class Game:
         self.player1 = player1
         self.player2 = player2
 
-        
     def loop(self):
         while self.winner == None:
             self.run()
@@ -37,9 +34,6 @@ class Game:
                 self.pause()
             if self.state.check_win():
                 self.winner = 3 - self.state.turn
-            
-    def update(self):
-        pass
     
     def draw_grid(self):
         for row in range(0,settings.Game_size*settings.Tile_size + settings.Tile_size, settings.Tile_size):

@@ -5,7 +5,6 @@ from state import State
 import ai
 import pygame_menu
 from copy import deepcopy
-import time
 
 player1 = ai.execute_human_move
 player2 = ai.execute_human_move
@@ -102,8 +101,8 @@ def difficulty_menu():
     if(player1 == player2 and player1 == ai.execute_human_move): start_game()
 
     difficulty = [
-        ("Easy", ai.execute_ai_move(ai.eval_mixed,5)),
-        ("Medium", ai.execute_ai_move(ai.eval_mixed2,7)),
+        ("Easy", ai.execute_ai_move(ai.eval_mixed,3)),
+        ("Medium", ai.execute_ai_move(ai.eval_mixed2,5)),
         ("Hard", ai.execute_monte_carlo_move()),
     ]
     menu = pygame_menu.Menu(
