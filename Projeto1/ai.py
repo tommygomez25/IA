@@ -84,7 +84,7 @@ def eval_black_hole(state):
 
 # manhattan distance from center   
 def eval_manh_dist(state):
-    bh = Game_size//2//2
+    bh = Game_size//2
     pieces1 = 0
     pieces2 = 0
     for piece in state.pieces:
