@@ -1,5 +1,4 @@
 import pygame
-from mcts import MonteCarloTreeSearchNode
 from settings import *
 import game
 from state import State
