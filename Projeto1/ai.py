@@ -109,6 +109,7 @@ def execute_monte_carlo_move():
         num_rollouts, node_count, run_time = root.statistics()
         game.state = game.state.move_piece(game.state.get_piece_at(move[0], move[1]), move[2], move[3])
         print("Number of rollouts: ", num_rollouts)
+        print("Number of nodes: ", node_count)
     return ai_move
 
 

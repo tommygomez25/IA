@@ -14,8 +14,6 @@ class Node:
         self.parent = parent
         self.N = 0  # times this position was visited
         self.Q = 0  # average reward (wins-losses) from this position
-        self.N_RAVE = 0
-        self.Q_RAVE = 0
         self.children = {}
         self.outcome = PLAYERS['none']
         
@@ -49,20 +47,6 @@ class UctMctsAgent:
         max_nodes = [n for n in self.root.children.values() if n.N == max_value]
         bestchild = choice(max_nodes)
         return bestchild.move
-    
-    #def move(self, move: tuple) -> None:
-    #    
-    #    if move in self.root.children:
-    #        child = self.root.children[move]
-    #        child.parent = None
-    #        self.root = child
-    #        self.root_state.move_piece(self.root_state.get_piece_at(move[0], move[1]), move[2], move[3])
-    #        return
-
-        # if for whatever reason the move is not in the children of
-        # the root just throw out the tree and start over
-        #self.root_state.move_piece(move[0], move[1], move[2], move[3])
-       # self.root = Node()
         
     def select_node(self) -> tuple:
         node = self.root
@@ -98,13 +82,15 @@ class UctMctsAgent:
 
     @staticmethod
     def roll_out(state: State) -> int:
-        
+        i = 0
         while state.get_outcome() == PLAYERS['none']:
+            print("rollout number: " + str(i))
             possible_moves = state.available_moves()
             if len(possible_moves) == 0:
                 break
             move = choice(possible_moves)
             state = state.move_piece(state.get_piece_at(move[0], move[1]), move[2], move[3])
+            i += 1
         
         return state.get_outcome()
     
@@ -132,7 +118,7 @@ class UctMctsAgent:
         
         start_time = time.time()
 
-        while  time.time() - start_time < time_budget:
+        while time.time() - start_time < time_budget:
             node, state = self.select_node()
             outcome = self.roll_out(state)
             self.backup(node, state.get_turn(), outcome)
