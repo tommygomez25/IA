@@ -56,7 +56,6 @@ def execute_monte_carlo_move():
 def execute_human_move(game):
     game.clock.tick(FPS)
     game.events()
-    #print("Game_size:", Game_size//2)
     game.update()
 
 # prioritizes the number of available moves
@@ -120,9 +119,9 @@ def eval_central_pieces(state):
                 for p in state.pieces:
                     if (p.x, p.y) == (opposite_x, opposite_y):
                         if p.color == color:
-                            score += 1000
+                            score += 1
                         elif p.color == opp_color:
-                            score -= 1000
+                            score -= 1
         return score
 
     pieces1 = sum(calc_score(state, piece, RED_PIECE_COLOR) for piece in state.pieces)
@@ -131,7 +130,13 @@ def eval_central_pieces(state):
     return pieces1 - pieces2
 
 def eval_mixed(state):
-    return eval_manh_dist(state) + eval_avail_moves(state)
+    return eval_manh_dist(state) + eval_avail_moves(state) + 10*eval_black_hole(state)
 
 def eval_mixed2(state):
     return eval_manh_dist(state) + eval_central_pieces(state) + eval_avail_moves(state)
+
+def eval_mixed3(state):
+    return 4*eval_central_pieces(state) + 100*eval_black_hole(state) - 10*state.p1plays
+
+def eval_mixed4(state):
+    return 100*eval_black_hole(state) - 10*state.p1plays + 4*eval_avail_moves(state)

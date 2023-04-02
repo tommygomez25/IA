@@ -22,21 +22,39 @@ class Game:
 
         
     def loop(self):
-        while self.winner == None:
-            self.run()
+        self.run()
+        self.state.p1plays = 0
+        self.state.p2plays = 0
         return self.winner
 
     def run(self):
+        p1time = 0
+        p2time = 0
+        p1n = 0
+        p2n = 0
         while self.winner is None:
             self.draw()
             if self.state.turn == 1:
+                start_time = time.time()
                 self.player1(self)
+                p1time += time.time() - start_time
+                self.state.p1plays += 1
+                p1n += 1
             else:
+                start_time = time.time()
                 self.player2(self)
+                p2time += time.time() - start_time
+                self.state.p2plays += 1
+                p2n += 1
             if self.playing == False:
                 self.pause()
             if self.state.check_win():
                 self.winner = 3 - self.state.turn
+                print("Winner: " + str(self.winner))
+                self.state.p1plays = 0
+                self.state.p2plays = 0
+        print(f"Player 1 average time: {p1time/p1n}")
+        print(f"Player 2 average time: {p2time/p2n}")
             
     def update(self):
         pass
@@ -66,7 +84,7 @@ class Game:
         for i in range(n):
             print(i)
             self.state = deepcopy(state_copy)
-            self.run(True)
+            self.run()
             print("END GAME")
             results[self.winner] += 1
             self.winner = None

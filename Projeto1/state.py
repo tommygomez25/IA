@@ -6,23 +6,28 @@ from piece import Piece
 
 class State:
     
-    def __init__(self):
+    def __init__(self, game_pieces = None):
         self.pieces = []
         self.pieces.append(Piece((settings.Game_size-1)/2,(settings.Game_size-1)/2,settings.BLACK_HOLE_COLOR,3))
-        # create pieces for player 1 and 2 according to settings.Game_size and position them only in matrix diagonal AND ANTI-DIAGONAL
-        for i in range(settings.Game_size):
-            for j in range(settings.Game_size):
-                if i == j and i != (settings.Game_size-1)/2 and j < (settings.Game_size-1)/2:
-                    self.pieces.append(Piece(i,j,settings.RED_PIECE_COLOR,1))
-                if i == j and i != (settings.Game_size-1)/2 and j > (settings.Game_size-1)/2:
-                    self.pieces.append(Piece(i,j,settings.BLUE_PIECE_COLOR,2))
-                if i + j == settings.Game_size - 1 and i != (settings.Game_size-1)/2 and j < (settings.Game_size-1)/2:
-                    self.pieces.append(Piece(i,j,settings.RED_PIECE_COLOR,1))
-                if i + j == settings.Game_size - 1 and i != (settings.Game_size-1)/2 and j > (settings.Game_size-1)/2:
-                    self.pieces.append(Piece(i,j,settings.BLUE_PIECE_COLOR,2))
+        if game_pieces is None:
+            # create pieces for player 1 and 2 according to settings.Game_size and position them only in matrix diagonal AND ANTI-DIAGONAL
+            for i in range(settings.Game_size):
+                for j in range(settings.Game_size):
+                    if i == j and i != (settings.Game_size-1)/2 and j < (settings.Game_size-1)/2:
+                        self.pieces.append(Piece(i,j,settings.RED_PIECE_COLOR,1))
+                    if i == j and i != (settings.Game_size-1)/2 and j > (settings.Game_size-1)/2:
+                        self.pieces.append(Piece(i,j,settings.BLUE_PIECE_COLOR,2))
+                    if i + j == settings.Game_size - 1 and i != (settings.Game_size-1)/2 and j < (settings.Game_size-1)/2:
+                        self.pieces.append(Piece(i,j,settings.RED_PIECE_COLOR,1))
+                    if i + j == settings.Game_size - 1 and i != (settings.Game_size-1)/2 and j > (settings.Game_size-1)/2:
+                        self.pieces.append(Piece(i,j,settings.BLUE_PIECE_COLOR,2))
+        else:
+            self.pieces = game_pieces
                     
         self.selected_piece = None
         self.turn = 1
+        self.p1plays = 0
+        self.p2plays = 0
     
     def draw(self,screen):
         for piece in self.pieces:
@@ -88,13 +93,13 @@ class State:
                 player1_pieces += 1
             elif piece.player == 2 and piece.removed:
                 player2_pieces += 1
-        if player1_pieces == (settings.Game_size -1)/2 and self.turn == 1:
+        if player1_pieces == (settings.Game_size -1)/2 or player1_pieces == 1 and self.turn == 1:
             return 1
-        elif player2_pieces == (settings.Game_size-1)/2 and self.turn == 2:
+        elif player2_pieces == (settings.Game_size-1)/2 or player2_pieces == 1 and self.turn == 2:
             return 2
-        elif player1_pieces == (settings.Game_size -1)/2 and self.turn == 2:
+        elif player1_pieces == (settings.Game_size -1)/2 or player1_pieces == 1 and self.turn == 2:
             return 1
-        elif player2_pieces == (settings.Game_size-1)/2 and self.turn == 1:
+        elif player2_pieces == (settings.Game_size-1)/2 or player2_pieces == 1 and self.turn == 1:
             return 2
         else :
             return 0

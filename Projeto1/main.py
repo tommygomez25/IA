@@ -6,6 +6,7 @@ import ai
 import pygame_menu
 from copy import deepcopy
 import time
+from piece import Piece
 
 player1 = ai.execute_human_move
 player2 = ai.execute_human_move
@@ -198,8 +199,22 @@ def display_winner(winner):
     menu.add.button("Back to menu", start_menu)
     menu.mainloop(surface)
 
+game_pieces = [
+    Piece(2,2,settings.BLACK_HOLE_COLOR, 0),
+    Piece(0,0,settings.RED_PIECE_COLOR, 1),
+    Piece(1,1,settings.RED_PIECE_COLOR,  1), 
+    Piece(3,2,settings.RED_PIECE_COLOR, 1),
+    Piece(3,1,settings.RED_PIECE_COLOR, 1), 
+    Piece(0,4,settings.BLUE_PIECE_COLOR, 2),
+    Piece(1,2,settings.BLUE_PIECE_COLOR, 2),
+    Piece(4,4,settings.BLUE_PIECE_COLOR, 2),
+    Piece(3,3,settings.BLUE_PIECE_COLOR, 2),
+]
+
 if __name__ == "__main__":
-    pygame.init()
-    surface = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
-    pygame.display.set_caption("Black Hole Escape")
-    start_menu()
+    #pygame.init()
+    #surface = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
+    #pygame.display.set_caption("Black Hole Escape")
+    #start_menu()
+    g = game.Game(State(game_pieces), ai.execute_ai_move(ai.eval_mixed3, 4), ai.execute_ai_move(ai.eval_mixed4, 4))
+    g.run_n_matches(10)
