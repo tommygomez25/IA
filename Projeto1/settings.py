@@ -10,8 +10,8 @@ GREY = (128,128,128)
 YELLOW = (255,255,0)
 GREEN = (0,255,0)
 BLACK = (0,0,0)
-Game_size = 5
-Tile_size = (((SCREEN_HEIGHT+SCREEN_WIDTH)//2)//Game_size+2)
+GAME_SIZE = 5
+TILE_SIZE = (((SCREEN_HEIGHT+SCREEN_WIDTH)//2)//GAME_SIZE+2)
 
 RULES= "This game is a two player game. Game is played on a 5x5 board. The middle square of the board is accepted as a black hole. \
 The aim of the game is to land firs two of game pieces on this center hole. \
@@ -24,7 +24,7 @@ Players try to land their ships on the black hole. The ship landed on this squar
 The ships can pass over the black hole, but for removing it must land on this square. The player who rescue first his/her two ships from this dimension win the game."
 
 def set_game_size(val):
-    global Game_size,Tile_size
-    Game_size = val
-    Tile_size = (((SCREEN_HEIGHT+SCREEN_WIDTH)//2)//Game_size+2)
+    global GAME_SIZE,TILE_SIZE
+    GAME_SIZE = val
+    TILE_SIZE = (((SCREEN_HEIGHT+SCREEN_WIDTH)//2)//GAME_SIZE+2)
     return

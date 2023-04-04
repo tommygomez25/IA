@@ -103,8 +103,8 @@ def difficulty_menu():
     if(player1 == player2 and player1 == ai.execute_human_move): start_game()
 
     difficulty = [
-        ("Easy", ai.execute_ai_move(ai.eval_mixed,5)),
-        ("Medium", ai.execute_ai_move(ai.eval_mixed2,7)),
+        ("Easy", ai.execute_ai_move(ai.eval_mixed,3)),
+        ("Medium", ai.execute_ai_move(ai.eval_mixed2,5)),
         ("Hard", ai.execute_monte_carlo_move()),
     ]
     menu = pygame_menu.Menu(
@@ -159,11 +159,11 @@ def rules():
     return
 
 def settings_menu():
-    if settings.Game_size == 5:
+    if settings.GAME_SIZE == 5:
         sizes = [("5x5",5),("7x7",7),("9x9",9)]
-    elif settings.Game_size == 7:
+    elif settings.GAME_SIZE == 7:
         sizes = [("7x7",7),("9x9",9),("5x5",5)]
-    elif settings.Game_size == 9:
+    elif settings.GAME_SIZE == 9:
         sizes = [("9x9",9),("5x5",5),("7x7",7)]
 
     menu = pygame_menu.Menu(
@@ -212,9 +212,10 @@ game_pieces = [
 ]
 
 if __name__ == "__main__":
-    #pygame.init()
-    #surface = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
-    #pygame.display.set_caption("Black Hole Escape")
-    #start_menu()
-    g = game.Game(State(game_pieces), ai.execute_ai_move(ai.eval_mixed3, 4), ai.execute_ai_move(ai.eval_mixed4, 4))
-    g.run_n_matches(10)
+    pygame.init()
+    surface = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
+    pygame.display.set_caption("Black Hole Escape")
+    start_menu()
+    #g = game.Game(State(), ai.execute_ai_move(ai.eval_mixed, 6), ai.execute_ai_move(ai.eval_mixed4, 6))
+    #g.run_n_matches(1)
+    
