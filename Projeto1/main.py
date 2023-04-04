@@ -216,6 +216,6 @@ if __name__ == "__main__":
     surface = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
     pygame.display.set_caption("Black Hole Escape")
     start_menu()
-    #g = game.Game(State(), ai.execute_ai_move(ai.eval_mixed, 6), ai.execute_ai_move(ai.eval_mixed4, 6))
+    #g = game.Game(State(), ai.execute_ai_move(ai.eval_mixed, 6), ai.execute_monte_carlo_move(5))
     #g.run_n_matches(1)
     
