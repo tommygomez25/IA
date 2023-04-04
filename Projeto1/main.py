@@ -103,9 +103,9 @@ def difficulty_menu():
     if(player1 == player2 and player1 == ai.execute_human_move): start_game()
 
     difficulty = [
-        ("Easy", ai.execute_ai_move(ai.eval_mixed,3)),
-        ("Medium", ai.execute_ai_move(ai.eval_mixed2,5)),
-        ("Hard", ai.execute_monte_carlo_move()),
+        ("Easy", ai.execute_ai_move(ai.eval_mixed,1)),
+        ("Medium", ai.execute_monte_carlo_move(3)),
+        ("Hard", ai.execute_ai_move(ai.eval_mixed3,5)),
     ]
     menu = pygame_menu.Menu(
         "Select difficulty", settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, theme=create_theme()

@@ -62,7 +62,7 @@ def minimax(state, depth, alpha, beta, maximizing, player, evaluate_func):
                 break
         return best_value, best_move
 
-def execute_monte_carlo_move(t):
+def execute_monte_carlo_move(t=10):
     def ai_move(game):
         game.clock.tick(FPS)
         root = UctMctsAgent(game.state)
