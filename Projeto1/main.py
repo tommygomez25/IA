@@ -1,9 +1,5 @@
 import pygame
-<<<<<<< HEAD
-from settings import *
-=======
 import settings
->>>>>>> 8445fa567347bcf8bd790cb687db091fc425928d
 import game
 from state import State
 import ai
