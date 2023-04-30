@@ -9,7 +9,7 @@ class State:
         self.pieces = []
         self.pieces.append(Piece((settings.Game_size-1)/2,(settings.Game_size-1)/2,settings.BLACK_HOLE_COLOR,3))
         # create pieces for player 1 and 2 according to settings.Game_size and position them only in matrix diagonal AND ANTI-DIAGONAL
-        """
+        
         for i in range(settings.Game_size):
             for j in range(settings.Game_size):
                 if i == j and i != (settings.Game_size-1)/2 and j < (settings.Game_size-1)/2:
@@ -20,9 +20,9 @@ class State:
                     self.pieces.append(Piece(i,j,settings.RED_PIECE_COLOR,1))
                 if i + j == settings.Game_size - 1 and i != (settings.Game_size-1)/2 and j > (settings.Game_size-1)/2:
                     self.pieces.append(Piece(i,j,settings.BLUE_PIECE_COLOR,2))
-                    """
-        self.pieces.append(Piece(2,1,settings.RED_PIECE_COLOR,1))
-        self.pieces.append(Piece(2,3,settings.BLUE_PIECE_COLOR,1))
+                    
+        #self.pieces.append(Piece(2,1,settings.RED_PIECE_COLOR,1))
+        #self.pieces.append(Piece(2,3,settings.BLUE_PIECE_COLOR,1))
         self.selected_piece = None
         self.turn = 1
         self.p1_moves = 0
