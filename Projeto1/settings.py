@@ -24,7 +24,7 @@ Players try to land their ships on the black hole. The ship landed on this squar
 The ships can pass over the black hole, but for removing it must land on this square. The player who rescue first his/her two ships from this dimension win the game."
 
 def set_game_size(val):
-    global Game_size,Tile_size
-    Game_size = val
-    Tile_size = (((SCREEN_HEIGHT+SCREEN_WIDTH)//2)//Game_size+2)
+    global GAME_SIZE,TILE_SIZE
+    GAME_SIZE = val
+    TILE_SIZE = (((SCREEN_HEIGHT+SCREEN_WIDTH)//2)//GAME_SIZE+2)
     return

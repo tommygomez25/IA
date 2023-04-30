@@ -1,8 +1,6 @@
 import pygame
-import pygame_menu
 import settings
 from piece import Piece
-from state import State
 import time
 from copy import deepcopy
 
@@ -20,33 +18,44 @@ class Game:
         self.player1 = player1
         self.player2 = player2
 
-        
     def loop(self):
         while self.winner == None:
             self.run()
         return self.winner
 
     def run(self):
+        p1time = 0
+        p2time = 0
+        n1plays = 0
+        n2plays = 0
         while self.winner is None:
             self.draw()
             if self.state.turn == 1:
+                self.state.p1plays += 1
+                start = time.time()
                 self.player1(self)
+                p1time += time.time() - start
+                n1plays += 1
             else:
+                self.state.p2plays += 1
+                start = time.time()
                 self.player2(self)
+                p2time += time.time() - start
+                n2plays += 1
             if self.playing == False:
                 self.pause()
             if self.state.check_win():
                 self.winner = 3 - self.state.turn
-            
-    def update(self):
-        pass
+        #print("Player 1 plays: ", self.state.p1plays)
+        #print("Player 1 average time: ", p1time/n1plays)
+        #print("Player 2 average time: ", p2time/n2plays)
     
     def draw_grid(self):
-        for row in range(0,settings.Game_size*settings.Tile_size + settings.Tile_size, settings.Tile_size):
-            pygame.draw.line(self.screen, settings.BLUE_PIECE_COLOR, (row,0), (row,settings.Game_size*settings.Tile_size),7)
+        for row in range(0,settings.GAME_SIZE*settings.TILE_SIZE + settings.TILE_SIZE, settings.TILE_SIZE):
+            pygame.draw.line(self.screen, settings.BLUE_PIECE_COLOR, (row,0), (row,settings.GAME_SIZE*settings.TILE_SIZE),7)
 
-        for col in range(0,settings.Game_size*settings.Tile_size + settings.Tile_size, settings.Tile_size+1):
-            pygame.draw.line(self.screen, settings.BLUE_PIECE_COLOR, (0,col), (settings.Game_size*settings.Tile_size,col),7)
+        for col in range(0,settings.GAME_SIZE*settings.TILE_SIZE + settings.TILE_SIZE, settings.TILE_SIZE+1):
+            pygame.draw.line(self.screen, settings.BLUE_PIECE_COLOR, (0,col), (settings.GAME_SIZE*settings.TILE_SIZE,col),7)
     
     def draw_board(self):
         self.state.draw(self.screen)
@@ -62,27 +71,20 @@ class Game:
         start_time = time.time()
         
         results = [0, 0, 0] # [draws, player 1 victories, player 2 victories]
-        print(n)
         for i in range(n):
-            print(i)
             self.state = deepcopy(state_copy)
-            self.run(True)
+            self.run()
             print("END GAME")
             results[self.winner] += 1
             self.winner = None
             self.turn = 1
             
-            if int(time.time() - start_time) > max_time:
-                print("Max time reached!")
-                break
-            
      
-        print("\n=== Elapsed time: %s seconds ===" % (int(time.time() - start_time)))
+        print("\n=== Elapsed time: %s seconds ===" % (time.time() - start_time))
         print(f"  Player 1: {results[1]} victories")
         print(f"  Player 2: {results[2]} victories")
         print(f"  Draws: {results[0]} ")
         print("===============================")
-        # close pygame
         pygame.quit()
 
     def events(self):
@@ -106,7 +108,7 @@ class Game:
                         # if the mouse is clicked on a friendly piece, select it
                         for piece in self.state.pieces:
                             if (piece.color == settings.RED_PIECE_COLOR and self.state.turn == 1 and piece != self.state.selected_piece )or (piece.color == settings.BLUE_PIECE_COLOR and self.state.turn == 2 and piece != self.state.selected_piece):
-                                if pygame.Rect(piece.x*settings.Tile_size, piece.y*settings.Tile_size, settings.Tile_size, settings.Tile_size).collidepoint(mouse_pos):
+                                if pygame.Rect(piece.x*settings.TILE_SIZE, piece.y*settings.TILE_SIZE, settings.TILE_SIZE, settings.TILE_SIZE).collidepoint(mouse_pos):
                                     #select piece and desselect others
                                     for p in self.state.pieces:
                                         p.selected = False
@@ -115,9 +117,9 @@ class Game:
                                     
                                         
  
-                        if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // settings.Tile_size, mouse_pos[1] // settings.Tile_size):
+                        if self.state.is_valid_move(self.state.selected_piece,mouse_pos[0] // settings.TILE_SIZE, mouse_pos[1] // settings.TILE_SIZE):
                             
-                            self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // settings.Tile_size, mouse_pos[1] // settings.Tile_size)
+                            self.state = self.state.move_piece(self.state.selected_piece,mouse_pos[0] // settings.TILE_SIZE, mouse_pos[1] // settings.TILE_SIZE)
                             self.state.selected_piece = None
                     
             else:
@@ -126,7 +128,7 @@ class Game:
                         mouse_pos = pygame.mouse.get_pos()
                         for piece in self.state.pieces:
                             if (piece.color == settings.RED_PIECE_COLOR and self.state.turn == 1) or (piece.color == settings.BLUE_PIECE_COLOR and self.state.turn == 2):
-                                if pygame.Rect(piece.x*settings.Tile_size, piece.y*settings.Tile_size, settings.Tile_size, settings.Tile_size).collidepoint(mouse_pos) and not piece.removed:
+                                if pygame.Rect(piece.x*settings.TILE_SIZE, piece.y*settings.TILE_SIZE, settings.TILE_SIZE, settings.TILE_SIZE).collidepoint(mouse_pos) and not piece.removed:
                                     #select piece and desselect others
                                     for p in self.state.pieces:
                                         p.selected = False
@@ -144,5 +146,3 @@ game_pieces = [
     Piece(4,4,settings.BLUE_PIECE_COLOR, 2),
     Piece(3,3,settings.BLUE_PIECE_COLOR, 2),
 ]
-
-    

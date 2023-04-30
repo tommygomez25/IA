@@ -6,6 +6,7 @@ import ai
 import pygame_menu
 from copy import deepcopy
 import time
+from piece import Piece
 
 player1 = ai.execute_human_move
 player2 = ai.execute_human_move
@@ -102,9 +103,9 @@ def difficulty_menu():
     if(player1 == player2 and player1 == ai.execute_human_move): start_game()
 
     difficulty = [
-        ("Easy", ai.execute_ai_move(ai.eval_mixed,5)),
-        ("Medium", ai.execute_ai_move(ai.eval_mixed2,7)),
-        ("Hard", ai.execute_monte_carlo_move()),
+        ("Easy", ai.execute_ai_move(ai.eval_mixed,1)),
+        ("Medium", ai.execute_monte_carlo_move(3)),
+        ("Hard", ai.execute_ai_move(ai.eval_mixed3,5)),
     ]
     menu = pygame_menu.Menu(
         "Select difficulty", settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, theme=create_theme()
@@ -158,11 +159,11 @@ def rules():
     return
 
 def settings_menu():
-    if settings.Game_size == 5:
+    if settings.GAME_SIZE == 5:
         sizes = [("5x5",5),("7x7",7),("9x9",9)]
-    elif settings.Game_size == 7:
+    elif settings.GAME_SIZE == 7:
         sizes = [("7x7",7),("9x9",9),("5x5",5)]
-    elif settings.Game_size == 9:
+    elif settings.GAME_SIZE == 9:
         sizes = [("9x9",9),("5x5",5),("7x7",7)]
 
     menu = pygame_menu.Menu(
@@ -198,8 +199,23 @@ def display_winner(winner):
     menu.add.button("Back to menu", start_menu)
     menu.mainloop(surface)
 
+game_pieces = [
+    Piece(2,2,settings.BLACK_HOLE_COLOR, 0),
+    Piece(0,0,settings.RED_PIECE_COLOR, 1),
+    Piece(1,1,settings.RED_PIECE_COLOR,  1), 
+    Piece(3,2,settings.RED_PIECE_COLOR, 1),
+    Piece(3,1,settings.RED_PIECE_COLOR, 1), 
+    Piece(0,4,settings.BLUE_PIECE_COLOR, 2),
+    Piece(1,2,settings.BLUE_PIECE_COLOR, 2),
+    Piece(4,4,settings.BLUE_PIECE_COLOR, 2),
+    Piece(3,3,settings.BLUE_PIECE_COLOR, 2),
+]
+
 if __name__ == "__main__":
     pygame.init()
     surface = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
     pygame.display.set_caption("Black Hole Escape")
     start_menu()
+    #g = game.Game(State(), ai.execute_ai_move(ai.eval_mixed, 6), ai.execute_monte_carlo_move(5))
+    #g.run_n_matches(1)
+    

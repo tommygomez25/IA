@@ -1,12 +1,11 @@
 import settings
-import pygame
 from piece import Piece
 from copy import deepcopy
 from piece import Piece
 
 class State:
     
-    def __init__(self):
+    def __init__(self, game_pieces = None):
         self.pieces = []
         self.pieces.append(Piece((settings.Game_size-1)/2,(settings.Game_size-1)/2,settings.BLACK_HOLE_COLOR,3))
         # create pieces for player 1 and 2 according to settings.Game_size and position them only in matrix diagonal AND ANTI-DIAGONAL
@@ -26,6 +25,12 @@ class State:
         self.pieces.append(Piece(2,3,settings.BLUE_PIECE_COLOR,1))
         self.selected_piece = None
         self.turn = 1
+        self.p1_moves = 0
+        self.p2_moves = 0
+        self.p1_last_moves = []
+        self.p2_last_moves = []
+        self.p1plays = 0
+        self.p2plays = 0
     
     def draw(self,screen):
         for piece in self.pieces:
@@ -35,7 +40,7 @@ class State:
         return piece.available_moves(self).count((piece.x,piece.y,x,y)) > 0
     
     def is_piece_at(self,x,y):
-        if x == (settings.Game_size-1)/2 and y == (settings.Game_size-1)/2:
+        if x == (settings.GAME_SIZE-1)/2 and y == (settings.GAME_SIZE-1)/2:
             return False
         for piece in self.pieces:
             if piece.x == x and piece.y == y and piece != self.selected_piece:
@@ -47,8 +52,6 @@ class State:
         for piece in self.pieces:
             if piece.player == self.turn and not piece.removed:
                 moves.extend(piece.available_moves(self))
-        
-        #print("Available moves: " + str(moves))
         return moves
     
     def move_piece(self,piece,x,y):
@@ -64,6 +67,10 @@ class State:
                     p.removed = True
                 state_copy.turn = 3 - state_copy.turn
                 return state_copy
+        if self.turn == 1:
+            self.p1_moves += 1
+        else:
+            self.p2_moves += 1
         return state_copy
     
     def get_piece_at(self,x,y):
@@ -80,7 +87,7 @@ class State:
                 player1_pieces += 1
             elif piece.player == 2 and piece.removed:
                 player2_pieces += 1
-        return player1_pieces == (settings.Game_size -1)/2 or player2_pieces == (settings.Game_size-1)/2
+        return player1_pieces == (settings.GAME_SIZE -1)/2 or player2_pieces == (settings.GAME_SIZE-1)/2
 
     def get_outcome(self):
         # Returns 1 or 0 or -1 depending on your state corresponding to win, tie or a loss.
@@ -91,13 +98,13 @@ class State:
                 player1_pieces += 1
             elif piece.player == 2 and piece.removed:
                 player2_pieces += 1
-        if player1_pieces == (settings.Game_size -1)/2 and self.turn == 1:
+        if player1_pieces == (settings.GAME_SIZE -1)/2 and self.turn == 1:
             return 1
-        elif player2_pieces == (settings.Game_size-1)/2 and self.turn == 2:
+        elif player2_pieces == (settings.GAME_SIZE-1)/2 and self.turn == 2:
             return 2
-        elif player1_pieces == (settings.Game_size -1)/2 and self.turn == 2:
+        elif player1_pieces == (settings.GAME_SIZE -1)/2 and self.turn == 2:
             return 1
-        elif player2_pieces == (settings.Game_size-1)/2 and self.turn == 1:
+        elif player2_pieces == (settings.GAME_SIZE-1)/2 and self.turn == 1:
             return 2
         else :
             return 0
